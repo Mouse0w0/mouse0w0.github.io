@@ -1,0 +1,725 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu">
+  
+    <title>使用LWJGL3开发3D游戏 第六章 变换 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter6 英文标题：Transformations  投影让我们看到在前一章中创建的漂亮的彩色的正方形。如果仔细看，它更像一个矩形，你甚至可以将窗口的宽度从600像素改为900像素，失真就会更加明显。这发生了什么事呢？ 如果你观察顶点着色器的代码，我们只是直接地传递坐标。换句话说，当一个顶点">
+<meta name="keywords" content="Java,LWJGL,OpenGL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用LWJGL3开发3D游戏 第六章 变换">
+<meta property="og:url" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-06-transformations/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter6 英文标题：Transformations  投影让我们看到在前一章中创建的漂亮的彩色的正方形。如果仔细看，它更像一个矩形，你甚至可以将窗口的宽度从600像素改为900像素，失真就会更加明显。这发生了什么事呢？ 如果你观察顶点着色器的代码，我们只是直接地传递坐标。换句话说，当一个顶点">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-06-transformations/coordinates.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-06-transformations/rectangle.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-06-transformations/2_2_matrix.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-06-transformations/projection_matrix.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-06-transformations/projection_matrix_eq.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-06-transformations/square_1.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-06-transformations/square_coloured.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-06-transformations/transformations.png">
+<meta property="og:updated_time" content="2019-02-27T14:42:50.966Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用LWJGL3开发3D游戏 第六章 变换">
+<meta name="twitter:description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter6 英文标题：Transformations  投影让我们看到在前一章中创建的漂亮的彩色的正方形。如果仔细看，它更像一个矩形，你甚至可以将窗口的宽度从600像素改为900像素，失真就会更加明显。这发生了什么事呢？ 如果你观察顶点着色器的代码，我们只是直接地传递坐标。换句话说，当一个顶点">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-06-transformations/coordinates.png">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a href="https://afdian.net/@mouse">捐助作者</a></li>
+					
+						<li><a href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索">
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</ul></nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope="" itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/02/07/Lwjglbook-06-transformations/" title="使用LWJGL3开发3D游戏 第六章 变换" itemprop="url">使用LWJGL3开发3D游戏 第六章 变换</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  </p><p class="article-time">
+    <time datetime="2019-02-07T09:12:41.000Z" itemprop="datePublished"> 发表于 2019-02-07</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#投影"><span class="toc-number">1.</span> <span class="toc-text">投影</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用变换"><span class="toc-number">2.</span> <span class="toc-text">使用变换</span></a></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a href="https://ahbejarano.gitbook.io/lwjglgamedev/chapter6" target="_blank" rel="noopener">https://ahbejarano.gitbook.io/lwjglgamedev/chapter6</a></p>
+<p>英文标题：Transformations</p>
+</blockquote>
+<h2 id="投影"><a href="#投影" class="headerlink" title="投影"></a>投影</h2><p>让我们看到在前一章中创建的漂亮的彩色的正方形。如果仔细看，它更像一个矩形，你甚至可以将窗口的宽度从600像素改为900像素，失真就会更加明显。这发生了什么事呢？</p>
+<p>如果你观察顶点着色器的代码，我们只是直接地传递坐标。换句话说，当一个顶点的X坐标为0.5时，我们对OpenGL说在屏幕的X坐标为0.5的位置绘制它。下图是OpenGL坐标（仅含X和Y轴）。</p>
+<p><img src="/2019/02/07/Lwjglbook-06-transformations/coordinates.png" alt="Coordinates"></p>
+<p>将这些坐标投影到窗口坐标，需要考虑到窗口的大小。因此，如果我们的窗口大小为900x480，OpenGL坐标(1, 0)将被投影到窗口坐标(900, 0)，最终创建一个矩形而不是一个正方形。</p>
+<p><img src="/2019/02/07/Lwjglbook-06-transformations/rectangle.png" alt="Rectangle"></p>
+<p>但是，问题远比这更严重。在0.0到1.0和-1.0之间修改正方形的坐标，你看到了什么？正方形是完全绘制在同一个地方，不管它是否沿着Z轴位移。为什么会发生这种情况？远处的物体应该比近处的物体小，但是我们使用相同的X和Y坐标绘制它们。</p>
+<p>但是，等等。这不应该用Z坐标来处理吗？这是正确的但是又不正确。Z坐标告诉OpenGL对象的远近，但是OpenGL对你的对象的大小一无所知。你可以有两个不同大小的物体，一个更近更小，一个更远更大，而且可以以相同的大小正确地投影到屏幕上（有相同的屏幕X和Y坐标，但Z坐标不同）。OpenGL只使用我们正在传递的坐标，所以必须处理这个问题。我们需要正确地投影坐标。</p>
+<p>既然已经确诊了这个问题，我们该怎么做？答案是使用投影矩阵（<code>Projection Matrix</code>）或截锥体（<code>Frustum</code>）。投影矩阵将处理绘制区域的宽高比（宽度和高度的关系），因此物体不会被扭曲。它也将处理距离，所以较远的物体将会被绘制得更小。投影矩阵还将考虑我们的视野和应该显示的最大距离有多远。</p>
+<p>对于不熟悉矩阵的人，矩阵（<code>Matrix</code>）是以行和列排列的二维数组。矩阵中的每个数字被称为元素。矩阵阶次是行和列的数量。例如，这里是一个2x2矩阵（有2行2列）。</p>
+<p><img src="/2019/02/07/Lwjglbook-06-transformations/2_2_matrix.png" alt="2x2 Matrix"></p>
+<p>矩阵有许多可以使用的基本运算法则（如加法、乘法等），你可以在任何数学书中查阅它们。与三维图形相关的矩阵对空间中点的变换非常有用。</p>
+<p>你可以把投影矩阵想象成一个摄像机，它有一个视野和最小和最大距离。该摄像机的可视区域是一个截断的金字塔。下图展示了该区域的俯视图。</p>
+<p><img src="/2019/02/07/Lwjglbook-06-transformations/projection_matrix.png" alt="Projection Matrix concepts"></p>
+<p>投影矩阵将正确地投影三维坐标，以便它们能够在二维屏幕上正确地显示。该矩阵的数学表示如下（不要害怕）:</p>
+<p><img src="/2019/02/07/Lwjglbook-06-transformations/projection_matrix_eq.png" alt="Projection Matrix"></p>
+<p>其中屏幕宽高比（<code>Aspect Ratio</code>）指的是屏幕宽度与屏幕高度的关系（<script type="math/tex">a=width/height</script>）。为了获得给定点的投影坐标，我们只需要将投影矩阵乘以原始坐标，结果将是投影后的另一个向量。</p>
+<p>因此我们需要处理一组数学对象，如向量、矩阵，并要可以对它们进行操作。我们可以选择从头开始编写所有的代码，或者使用已经实现的库。当然我们会选择容易的方法，使用JOML（<code>Java OpenGL Math Library</code>）处理LWJGL内的数学运算。为了使用该库，我们只需要为<code>pom.xml</code>文件添加另一个依赖项。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.joml<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>joml<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;joml.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>然后设定使用的库版本。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">    [...]</span><br><span class="line">    <span class="tag">&lt;<span class="name">joml.version</span>&gt;</span>1.9.6<span class="tag">&lt;/<span class="name">joml.version</span>&gt;</span></span><br><span class="line">    [...]</span><br><span class="line"><span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>现在一切都完事了，让我们创建我们的投影矩阵吧。在<code>Renderer</code>类中创建<code>Matrix4f</code>类（由JOML库提供）的实例。<code>Matrix4f</code>类提供了一个<code>perspective</code>方法来创建投影矩阵。该方法需要以下参数：</p>
+<ul>
+<li>视野：可视区域的弧度角大小。我们将定义一个储存该值的常数。</li>
+<li>屏幕宽高比。</li>
+<li>最近视距（z-near）。</li>
+<li>最远视距（z-far）。</li>
+</ul>
+<p>我们将在<code>init</code>方法中实例化该矩阵，因此需要将引用传递给<code>Window</code>实例以获得窗口大小（你可以在源代码看到它）。代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Field of View in Radians</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> FOV = (<span class="keyword">float</span>) Math.toRadians(<span class="number">60.0f</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> Z_NEAR = <span class="number">0.01f</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> Z_FAR = <span class="number">1000</span>.f;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> Matrix4f projectionMatrix;</span><br></pre></td></tr></table></figure>
+<p>投影矩阵的创建如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span> aspectRatio = (<span class="keyword">float</span>) window.getWidth() / window.getHeight();</span><br><span class="line">projectionMatrix = <span class="keyword">new</span> Matrix4f().perspective(FOV, aspectRatio,</span><br><span class="line">    Z_NEAR, Z_FAR);</span><br></pre></td></tr></table></figure>
+<p>现在我们忽略宽高比可以改变（通过调整窗口大小）。这可以在<code>render</code>方法中检查并相应地改变投影矩阵。</p>
+<p>现在有了矩阵，我们如何使用它呢？我们需要在着色器中使用它，并且它应该被应用到所有顶点上。首先，你可能会想到把它捆绑在顶点输入中（就像坐标和颜色那样）。但这样，我们会浪费很多空间，因为投影矩阵在几次渲染期间都不会发生改变。你可能还想在Java代码中用矩阵处理所有顶点。但是，这样我们输入的VBO就是没用的了，这样就不能使用显卡中的处理器资源了。</p>
+<p>答案是使用“<code>uniform</code>”。Uniform是着色器可以使用的全局的GLSL变量，我们将使用它与着色器交流。</p>
+<p>所以我们需要修改顶点着色器的代码，并声明一个新的称为<code>projectionMatrix</code>的全局变量，并用它来计算投影位置。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#version 330</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">layout</span> (<span class="keyword">location</span>=<span class="number">0</span>) <span class="keyword">in</span> <span class="type">vec3</span> position;</span><br><span class="line"><span class="keyword">layout</span> (<span class="keyword">location</span>=<span class="number">1</span>) <span class="keyword">in</span> <span class="type">vec3</span> inColour;</span><br><span class="line"></span><br><span class="line"><span class="keyword">out</span> <span class="type">vec3</span> exColour;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uniform</span> <span class="type">mat4</span> projectionMatrix;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">gl_Position</span> = projectionMatrix * <span class="type">vec4</span>(position, <span class="number">1.0</span>);</span><br><span class="line">    exColour = inColour;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上所述，我们把<code>projectionMatrix</code>定义为一个4x4的矩阵，新的坐标是通过把它与原始坐标相乘得到的。现在我们需要把投影矩阵的值传递给着色器。首先，我们需要确定全局变量的位置。</p>
+<p>这是通过调用方法<code>glGetUniformLocation</code>完成的，它有两个参数：</p>
+<ul>
+<li>着色器程序的ID</li>
+<li>全局变量名（它应该与着色器里定义的名称相同）</li>
+</ul>
+<p>此方法返回储存全局变量的ID。由于我们可能有一个以上的全局变量，我们将把这些ID储存在由变量名作为索引的Map中（稍后我们需要那个ID）。因此，在<code>ShaderProgram</code>需要创建一个新的字段来保存这些ID：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, Integer&gt; uniforms;</span><br></pre></td></tr></table></figure>
+<p>然后由构造方法初始化它：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uniforms = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br></pre></td></tr></table></figure>
+<p>最后，我们创建一个方法来获得全局变量储存的位置。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">createUniform</span><span class="params">(String uniformName)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> uniformLocation = glGetUniformLocation(programId,</span><br><span class="line">        uniformName);</span><br><span class="line">    <span class="keyword">if</span> (uniformLocation &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> Exception(<span class="string">"Could not find uniform:"</span> +</span><br><span class="line">            uniformName);</span><br><span class="line">    &#125;</span><br><span class="line">    uniforms.put(uniformName, uniformLocation);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在在着色器程序编译后，我们就可以在<code>Renderer</code>类中调用<code>createUniform</code>方法（现在我们投影矩阵实例化后就调用它）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shaderProgram.createUniform(<span class="string">"projectionMatrix"</span>);</span><br></pre></td></tr></table></figure>
+<p>现在，我们已经准备好一个可以储存投影矩阵数据的储存器。由于投影矩阵在渲染期间不会改变，所以可以在创建后直接设置值。但是我们将在<code>render</code>方法中做这件事。稍后你可以看到，我们可以重用该全局变量来做额外的事情，这些事情需要在每次渲染调用中完成。</p>
+<p>我们将在<code>ShaderProgram</code>类中创建另一个方法来设置数据，称为<code>setUniform</code>。我们通过使用JOML库提供的实用方法将矩阵转换成4x4的<code>FloatBuffer</code>对象，并将它们发送到全局变量中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUniform</span><span class="params">(String uniformName, Matrix4f value)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Dump the matrix into a float buffer</span></span><br><span class="line">    <span class="keyword">try</span> (MemoryStack stack = MemoryStack.stackPush()) &#123;</span><br><span class="line">        FloatBuffer fb = stack.mallocFloat(<span class="number">16</span>);</span><br><span class="line">        value.get(fb);</span><br><span class="line">        glUniformMatrix4fv(uniforms.get(uniformName), <span class="keyword">false</span>, fb);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>正如你看到的，我们以不同的方式创建缓冲区。我们使用的是自动管理缓冲区，并将它们分配到堆栈上。这是因为这个缓冲区是大小很小，而且它在本方法外不被使用。因此，我们使用<code>MemoryStack</code>类。</p>
+<p>现在，在着色器绑定之后，<code>Renderer</code>类中的<code>render</code>方法可以使用该方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shaderProgram.setUniform(<span class="string">"projectionMatrix"</span>, projectionMatrix);</span><br></pre></td></tr></table></figure>
+<p>我们快要完成了。现在我们可以正确地渲染正方形。所以现在可以启动你的程序，然后得到一个…黑色背景上没有任何彩色正方形。发生了什么？我们弄糟了什么吗？实际上没有任何问题。记住我们正在模拟摄像机观察场景的效果。我们提供了两个距离，一个是最远视距（1000f）和一个最近视距（0.01f）。而我们的坐标是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span>[] positions = <span class="keyword">new</span> <span class="keyword">float</span>[]&#123;</span><br><span class="line">    -<span class="number">0.5f</span>,  <span class="number">0.5f</span>, <span class="number">0.0f</span>,</span><br><span class="line">    -<span class="number">0.5f</span>, -<span class="number">0.5f</span>, <span class="number">0.0f</span>,</span><br><span class="line">     <span class="number">0.5f</span>, -<span class="number">0.5f</span>, <span class="number">0.0f</span>,</span><br><span class="line">     <span class="number">0.5f</span>,  <span class="number">0.5f</span>, <span class="number">0.0f</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>也就是说，我们坐标中的Z坐标在可视区域之外。给它们赋值为-0.05f。现在你会看到像这样的一个巨大的绿色矩形：</p>
+<p><img src="/2019/02/07/Lwjglbook-06-transformations/square_1.png" alt="Square 1"></p>
+<p>这是因为，我们正绘制出离摄像机机太近的正方形。我们实际上是在放大它。如果现在把一个<code>-1.05f</code>的值赋值给Z坐标，就可以看到彩色正方形了。</p>
+<p><img src="/2019/02/07/Lwjglbook-06-transformations/square_coloured.png" alt="Square coloured"></p>
+<p>如果继续向后移动正方形，我们会看到它变小了。还要注意到正方形不再像矩形了。</p>
+<h2 id="使用变换"><a href="#使用变换" class="headerlink" title="使用变换"></a>使用变换</h2><p>让我们回想一下到目前为止我们都做了什么。我们已经学会了如何将数据以有效的格式传递给显卡，以及如何使用顶点和片元着色器来投影这些顶点并设置它们的颜色。现在应该开始在三维空间中绘制更复杂的模型了。但为了做到这件事，我们必须能够加载模型，并在指定的位置以适当的大小和所需的旋转将它渲染在三维空间中。</p>
+<p>现在为了实现这种渲染，我们需要提供一些基本操作来操作模型：</p>
+<ul>
+<li>移动(<code>translation</code>): 在三个轴中的任意一个轴上移动一个物体。</li>
+<li>旋转(<code>Rotation</code>): 按任意一个轴旋转物体任意角度。</li>
+<li>缩放(<code>Scale</code>): 调整物体的大小。</li>
+</ul>
+<p><img src="/2019/02/07/Lwjglbook-06-transformations/transformations.png" alt="Transformations"></p>
+<p>上面的操作统称为变换（<code>Transformation</code>）。你可能猜到要实现这一点的方法是把坐标乘以一组矩阵（一个用于移动，一个用于旋转，一个用于缩放）。这三个矩阵将被组合成一个称为“世界矩阵”的矩阵，并作为一个全局变量传递给顶点着色器。</p>
+<p>之所以被称为世界矩阵是因为我们正在从模型坐标转换为世界坐标。当学习加载3D模型时，你会发现这些模型是在它们自己的坐标系中定义的。它们不知道你的三维空间的大小，但它们需要在里面渲染。因此，当我们用矩阵乘以坐标时，实际上做的是从一个坐标系（模型坐标系）转换到另一个坐标系（三维世界坐标系）。</p>
+<p>世界矩阵应该这样计算（顺序很重要，因为乘法交换律不适用于矩阵）:</p>
+<script type="math/tex; mode=display">
+World Matrix\left[Translation Matrix\right]\left[Rotation Matrix\right]\left[Scale Matrix\right]</script><p>如果把投影矩阵包含在变换矩阵中，它会是这样的：</p>
+<script type="math/tex; mode=display">
+Transf=\left[Proj Matrix\right]\left[Translation Matrix\right]\left[Rotation Matrix\right]\left[Scale Matrix\right]=\left[Proj Matrix\right]\left[World Matrix\right]</script><p>变换矩阵是这样的：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+1 & 0 & 0 & dx \\
+0 & 1 & 0 & dy \\
+0 & 0 & 1 & dz \\
+0 & 0 & 0 & 1
+\end{bmatrix}</script><p>位移矩阵参数如下：</p>
+<ul>
+<li>dx: 沿X轴位移。</li>
+<li>dy: 沿Y轴位移。</li>
+<li>dz: 沿Z轴位移。</li>
+</ul>
+<p>缩放矩阵是这样定义的；</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+sx & 0 & 0 & 0 \\
+0 & sy & 0 & 0 \\
+0 & 0 & sz & 0 \\
+0 & 0 & 0 & 1
+\end{bmatrix}</script><p>缩放矩阵参数如下：</p>
+<ul>
+<li>sx: 沿着X轴缩放。</li>
+<li>sy: 沿着Y轴缩放。</li>
+<li>sz: 沿着Z轴缩放。</li>
+</ul>
+<p>旋转矩阵要复杂得多，但请记住，它可以由每个绕单独的轴旋转的旋转矩阵相乘得到。</p>
+<p>现在，为了实践这些理论，我们需要重构代码一点点。在游戏中，我们将加载一组模型，用来根据游戏逻辑在不同的位置渲染许多对象（想象一个FPS游戏，它载入了三个不同敌人的模型。确实只有三个模型，但使用这些模型，我们可以渲染想要的任意数量的敌人）。我们需要为每个对象创建一个VAO和一组VBO吗？答案是否定的，只需要每个模型加载一次就行。我们需要做的是根据它的位置，大小和旋转来独立绘制它。当渲染这些模型时，我们需要对它们进行变换。</p>
+<p>因此，我们将创建一个名为<code>GameItem</code>的新类，该类将模型加载到<code>Mesh</code>实例中。一个<code>GameItem</code>实例将由变量储存它的位置、旋转状态和大小。这个就是这个类的定义。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.lwjglb.engine;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.joml.Vector3f;</span><br><span class="line"><span class="keyword">import</span> org.lwjglb.engine.graph.Mesh;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GameItem</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Mesh mesh;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Vector3f position;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> scale;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Vector3f rotation;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">GameItem</span><span class="params">(Mesh mesh)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mesh = mesh;</span><br><span class="line">        position = <span class="keyword">new</span> Vector3f(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">        scale = <span class="number">1</span>;</span><br><span class="line">        rotation = <span class="keyword">new</span> Vector3f(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Vector3f <span class="title">getPosition</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> position;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setPosition</span><span class="params">(<span class="keyword">float</span> x, <span class="keyword">float</span> y, <span class="keyword">float</span> z)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.position.x = x;</span><br><span class="line">        <span class="keyword">this</span>.position.y = y;</span><br><span class="line">        <span class="keyword">this</span>.position.z = z;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">float</span> <span class="title">getScale</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> scale;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setScale</span><span class="params">(<span class="keyword">float</span> scale)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.scale = scale;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Vector3f <span class="title">getRotation</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> rotation;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setRotation</span><span class="params">(<span class="keyword">float</span> x, <span class="keyword">float</span> y, <span class="keyword">float</span> z)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.rotation.x = x;</span><br><span class="line">        <span class="keyword">this</span>.rotation.y = y;</span><br><span class="line">        <span class="keyword">this</span>.rotation.z = z;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Mesh <span class="title">getMesh</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mesh;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们将创建一个名为<code>Transformation</code>的类，让它来处理变换。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.lwjglb.engine.graph;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.joml.Matrix4f;</span><br><span class="line"><span class="keyword">import</span> org.joml.Vector3f;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Transformation</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Matrix4f projectionMatrix;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Matrix4f worldMatrix;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Transformation</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        worldMatrix = <span class="keyword">new</span> Matrix4f();</span><br><span class="line">        projectionMatrix = <span class="keyword">new</span> Matrix4f();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Matrix4f <span class="title">getProjectionMatrix</span><span class="params">(<span class="keyword">float</span> fov, <span class="keyword">float</span> width, <span class="keyword">float</span> height, <span class="keyword">float</span> zNear, <span class="keyword">float</span> zFar)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">float</span> aspectRatio = width / height;        </span><br><span class="line">        projectionMatrix.identity();</span><br><span class="line">        projectionMatrix.perspective(fov, aspectRatio, zNear, zFar);</span><br><span class="line">        <span class="keyword">return</span> projectionMatrix;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Matrix4f <span class="title">getWorldMatrix</span><span class="params">(Vector3f offset, Vector3f rotation, <span class="keyword">float</span> scale)</span> </span>&#123;</span><br><span class="line">        worldMatrix.identity().translate(offset).</span><br><span class="line">                rotateX((<span class="keyword">float</span>)Math.toRadians(rotation.x)).</span><br><span class="line">                rotateY((<span class="keyword">float</span>)Math.toRadians(rotation.y)).</span><br><span class="line">                rotateZ((<span class="keyword">float</span>)Math.toRadians(rotation.z)).</span><br><span class="line">                scale(scale);</span><br><span class="line">        <span class="keyword">return</span> worldMatrix;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>正如你所看到的，这个类把投影矩阵和世界矩阵结合起来。给定一组参数来进行位移、旋转和缩放，然后返回世界矩阵。<code>getWorldMatrix</code>返回的结果将为每个<code>GameItem</code>实例转换坐标。该类还提供了获得投影矩阵的方法。</p>
+<p>需要注意的一件事是，<code>Matrix4f</code>类的<code>mul</code>方法修改了该实例的内容。因此，如果直接将投影矩阵与变换矩阵相乘，我们会修改投影矩阵本身。这就是为什么总是在每次调用时将每个矩阵初始化为单位矩阵。</p>
+<p>在<code>Renderer</code>类的构造方法中，我们仅实例化了没有任何参数的<code>Transformation</code>类，而在<code>init</code>方法中，我们只创建了Uniform。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Renderer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    transformation = <span class="keyword">new</span> Transformation();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(Window window)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="comment">// .... Some code before ...</span></span><br><span class="line">    <span class="comment">// Create uniforms for world and projection matrices</span></span><br><span class="line">    shaderProgram.createUniform(<span class="string">"projectionMatrix"</span>);</span><br><span class="line">    shaderProgram.createUniform(<span class="string">"worldMatrix"</span>);</span><br><span class="line"></span><br><span class="line">    window.setClearColor(<span class="number">0.0f</span>, <span class="number">0.0f</span>, <span class="number">0.0f</span>, <span class="number">0.0f</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>Renderer</code>类的渲染方法中，现在可以接收到一个<code>GameItem</code>的数组：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">render</span><span class="params">(Window window, GameItem[] gameItems)</span> </span>&#123;</span><br><span class="line">    clear();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ( window.isResized() ) &#123;</span><br><span class="line">            glViewport(<span class="number">0</span>, <span class="number">0</span>, window.getWidth(), window.getHeight());</span><br><span class="line">            window.setResized(<span class="keyword">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    shaderProgram.bind();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Update projection Matrix</span></span><br><span class="line">    Matrix4f projectionMatrix = transformation.getProjectionMatrix(FOV, window.getWidth(), window.getHeight(), Z_NEAR, Z_FAR);</span><br><span class="line">    shaderProgram.setUniform(<span class="string">"projectionMatrix"</span>, projectionMatrix);        </span><br><span class="line"></span><br><span class="line">    <span class="comment">// Render each gameItem</span></span><br><span class="line">    <span class="keyword">for</span>(GameItem gameItem : gameItems) &#123;</span><br><span class="line">        <span class="comment">// Set world matrix for this item</span></span><br><span class="line">        Matrix4f worldMatrix =</span><br><span class="line">            transformation.getWorldMatrix(</span><br><span class="line">                gameItem.getPosition(),</span><br><span class="line">                gameItem.getRotation(),</span><br><span class="line">                gameItem.getScale());</span><br><span class="line">        shaderProgram.setUniform(<span class="string">"worldMatrix"</span>, worldMatrix);</span><br><span class="line">        <span class="comment">// Render the mes for this game item</span></span><br><span class="line">        gameItem.getMesh().render();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    shaderProgram.unbind();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>每次调用<code>render</code>时就更新投影矩阵一次。这样，我们可以处理窗口大小的调整。然后，我们遍历<code>GameItem</code>数组，并根据它们各自的位置、旋转和大小创建变换矩阵。这个矩阵将被传递到着色器并绘制<code>Mesh</code>。投影矩阵对于所有要渲染的项目都是相同的。这就是为什么它在<code>Transformation</code>类中是单独一个变量的原因。</p>
+<p>我们将渲染代码移动到<code>Mesh</code>类中。<br>We moved the rendering code to draw a Mesh to this class:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">render</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 绘制Mesh</span></span><br><span class="line">    glBindVertexArray(getVaoId());</span><br><span class="line">    glEnableVertexAttribArray(<span class="number">0</span>);</span><br><span class="line">    glEnableVertexAttribArray(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    glDrawElements(GL_TRIANGLES, getVertexCount(), GL_UNSIGNED_INT, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 重置状态</span></span><br><span class="line">    glDisableVertexAttribArray(<span class="number">0</span>);</span><br><span class="line">    glDisableVertexAttribArray(<span class="number">1</span>);</span><br><span class="line">    glBindVertexArray(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>顶点着色器只需简单地添加一个新的<code>worldMatrix</code>变量，然后用它与<code>projectionMatrix</code>一同计算坐标：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#version 330</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">layout</span> (<span class="keyword">location</span>=<span class="number">0</span>) <span class="keyword">in</span> <span class="type">vec3</span> position;</span><br><span class="line"><span class="keyword">layout</span> (<span class="keyword">location</span>=<span class="number">1</span>) <span class="keyword">in</span> <span class="type">vec3</span> inColour;</span><br><span class="line"></span><br><span class="line"><span class="keyword">out</span> <span class="type">vec3</span> exColour;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uniform</span> <span class="type">mat4</span> worldMatrix;</span><br><span class="line"><span class="keyword">uniform</span> <span class="type">mat4</span> projectionMatrix;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">gl_Position</span> = projectionMatrix * worldMatrix * <span class="type">vec4</span>(position, <span class="number">1.0</span>);</span><br><span class="line">    exColour = inColour;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>正如你所看到的，代码完全一样。我们使用Uniform来正确地计算坐标，并且考虑截锥、位置、大小和旋转等。</p>
+<p>另外一个重要的问题是，为什么不使用位移、旋转和缩放矩阵，而是把它们组合成一个世界矩阵？原因是我们应该尽量减少在着色器中使用的矩阵。还要记住，在着色器中所做的矩阵乘法是每个顶点一次。投影矩阵在渲染调用期间不会改变，而每一个<code>GameItem</code>实例的世界矩阵也不会改变。如果我们独立位移、旋转和缩放矩阵，我们要做更多的矩阵乘法运算。想象一个有超多顶点的模型，这是很多余的操作。</p>
+<p>但你现在可能会想，如果每个<code>GameItem</code>中的世界矩阵都不会发生变化，为什么不在Java类中做矩阵乘法？我们将投影矩阵和世界矩阵与每个<code>GameItem</code>相乘，把它们作为一个Uniform，这种情况下，我们确实能节省更多的操作。但是，当我们向游戏引擎中添加更多的特性时，我们需要在着色器中使用世界坐标，所以最好以独立的方式处理这两个矩阵。</p>
+<p>最后只需要修改一下<code>DummyGame</code>类，创建一个<code>GameItem</code>实例，让其与<code>Mesh</code>关联，并添加一些操作来位移，旋转和缩放正方形。因为这只是个测试示例，所有没有添加太多，你可以在本书的源代码中找到相关内容。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/LwjglBook/">LwjglBook</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/LWJGL/">LWJGL</a><a href="/tags/OpenGL/">OpenGL</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2019/02/07/Lwjglbook-06-transformations/" data-title="使用LWJGL3开发3D游戏 第六章 变换 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev">
+ <a href="/2019/02/07/Lwjglbook-07-textures/" title="使用LWJGL3开发3D游戏 第七章 纹理">
+  <strong>上一篇：</strong><br>
+  <span>
+  使用LWJGL3开发3D游戏 第七章 纹理</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/02/07/Lwjglbook-05-more-on-rendering/" title="使用LWJGL3开发3D游戏 第五章 更多关于渲染的事情">
+ <strong>下一篇：</strong><br> 
+ <span>使用LWJGL3开发3D游戏 第五章 更多关于渲染的事情
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '使用LWJGL3开发3D游戏 第六章 变换',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#投影"><span class="toc-number">1.</span> <span class="toc-text">投影</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用变换"><span class="toc-number">2.</span> <span class="toc-text">使用变换</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.net/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/LwjglBook/" title="LwjglBook">LwjglBook<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>27</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>19</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LWJGL/" title="LWJGL">LWJGL<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Programming/" title="Programming">Programming<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nashorn/" title="Nashorn">Nashorn<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JNI/" title="JNI">JNI<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer">
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br>
+			喜欢Java，MineCraft和二次元。</p>
+	</section>
+	 
+	<div class="social-font">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons">
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2019 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

@@ -1,0 +1,753 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu">
+  
+    <title>使用LWJGL3开发3D游戏 第七章 纹理 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter7 英文标题：Textures  创建一个三维立方体在本章中，我们将学习如何在渲染中加载纹理并使用它们。为了讲解与纹理相关的所有概念，我们将把之前章节中使用的正方形更改为三维立方体。为了绘制一个立方体，我们只需要正确地设置一个立方体的坐标，就能使用现有代码正确地绘制它。 为了绘制立方体">
+<meta name="keywords" content="Java,LWJGL,OpenGL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用LWJGL3开发3D游戏 第七章 纹理">
+<meta property="og:url" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-07-textures/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter7 英文标题：Textures  创建一个三维立方体在本章中，我们将学习如何在渲染中加载纹理并使用它们。为了讲解与纹理相关的所有概念，我们将把之前章节中使用的正方形更改为三维立方体。为了绘制一个立方体，我们只需要正确地设置一个立方体的坐标，就能使用现有代码正确地绘制它。 为了绘制立方体">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-07-textures/cube_coords.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-07-textures/cube_no_depth_test.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-07-textures/cube_depth_test.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-07-textures/texture_mapping.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-07-textures/texture_coordinates.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-07-textures/cube_texture.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-07-textures/cube_texture_front_face.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-07-textures/cube_texture_top_face.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-07-textures/cube_with_texture.png">
+<meta property="og:updated_time" content="2019-02-27T14:42:50.978Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用LWJGL3开发3D游戏 第七章 纹理">
+<meta name="twitter:description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter7 英文标题：Textures  创建一个三维立方体在本章中，我们将学习如何在渲染中加载纹理并使用它们。为了讲解与纹理相关的所有概念，我们将把之前章节中使用的正方形更改为三维立方体。为了绘制一个立方体，我们只需要正确地设置一个立方体的坐标，就能使用现有代码正确地绘制它。 为了绘制立方体">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-07-textures/cube_coords.png">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a href="https://afdian.net/@mouse">捐助作者</a></li>
+					
+						<li><a href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索">
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</ul></nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope="" itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/02/07/Lwjglbook-07-textures/" title="使用LWJGL3开发3D游戏 第七章 纹理" itemprop="url">使用LWJGL3开发3D游戏 第七章 纹理</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  </p><p class="article-time">
+    <time datetime="2019-02-07T09:12:58.000Z" itemprop="datePublished"> 发表于 2019-02-07</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#创建一个三维立方体"><span class="toc-number">1.</span> <span class="toc-text">创建一个三维立方体</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#为立方体添加纹理"><span class="toc-number">2.</span> <span class="toc-text">为立方体添加纹理</span></a></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a href="https://ahbejarano.gitbook.io/lwjglgamedev/chapter7" target="_blank" rel="noopener">https://ahbejarano.gitbook.io/lwjglgamedev/chapter7</a></p>
+<p>英文标题：Textures</p>
+</blockquote>
+<h2 id="创建一个三维立方体"><a href="#创建一个三维立方体" class="headerlink" title="创建一个三维立方体"></a>创建一个三维立方体</h2><p>在本章中，我们将学习如何在渲染中加载纹理并使用它们。为了讲解与纹理相关的所有概念，我们将把之前章节中使用的正方形更改为三维立方体。为了绘制一个立方体，我们只需要正确地设置一个立方体的坐标，就能使用现有代码正确地绘制它。</p>
+<p>为了绘制立方体，我们只需要定义八个顶点。</p>
+<p><img src="/2019/02/07/Lwjglbook-07-textures/cube_coords.png" alt="立方体坐标"></p>
+<p>因此，它的坐标数组将是这样的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span>[] positions = <span class="keyword">new</span> <span class="keyword">float</span>[] &#123;</span><br><span class="line">    <span class="comment">// VO</span></span><br><span class="line">    -<span class="number">0.5f</span>,  <span class="number">0.5f</span>,  <span class="number">0.5f</span>,</span><br><span class="line">    <span class="comment">// V1</span></span><br><span class="line">    -<span class="number">0.5f</span>, -<span class="number">0.5f</span>,  <span class="number">0.5f</span>,</span><br><span class="line">    <span class="comment">// V2</span></span><br><span class="line">    <span class="number">0.5f</span>, -<span class="number">0.5f</span>,  <span class="number">0.5f</span>,</span><br><span class="line">    <span class="comment">// V3</span></span><br><span class="line">     <span class="number">0.5f</span>,  <span class="number">0.5f</span>,  <span class="number">0.5f</span>,</span><br><span class="line">    <span class="comment">// V4</span></span><br><span class="line">    -<span class="number">0.5f</span>,  <span class="number">0.5f</span>, -<span class="number">0.5f</span>,</span><br><span class="line">    <span class="comment">// V5</span></span><br><span class="line">     <span class="number">0.5f</span>,  <span class="number">0.5f</span>, -<span class="number">0.5f</span>,</span><br><span class="line">    <span class="comment">// V6</span></span><br><span class="line">    -<span class="number">0.5f</span>, -<span class="number">0.5f</span>, -<span class="number">0.5f</span>,</span><br><span class="line">    <span class="comment">// V7</span></span><br><span class="line">     <span class="number">0.5f</span>, -<span class="number">0.5f</span>, -<span class="number">0.5f</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>当然，由于我们多了4个顶点，我们需要更改颜色数组。当前仅重复前四项的值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span>[] colours = <span class="keyword">new</span> <span class="keyword">float</span>[]&#123;</span><br><span class="line">    <span class="number">0.5f</span>, <span class="number">0.0f</span>, <span class="number">0.0f</span>,</span><br><span class="line">    <span class="number">0.0f</span>, <span class="number">0.5f</span>, <span class="number">0.0f</span>,</span><br><span class="line">    <span class="number">0.0f</span>, <span class="number">0.0f</span>, <span class="number">0.5f</span>,</span><br><span class="line">    <span class="number">0.0f</span>, <span class="number">0.5f</span>, <span class="number">0.5f</span>,</span><br><span class="line">    <span class="number">0.5f</span>, <span class="number">0.0f</span>, <span class="number">0.0f</span>,</span><br><span class="line">    <span class="number">0.0f</span>, <span class="number">0.5f</span>, <span class="number">0.0f</span>,</span><br><span class="line">    <span class="number">0.0f</span>, <span class="number">0.0f</span>, <span class="number">0.5f</span>,</span><br><span class="line">    <span class="number">0.0f</span>, <span class="number">0.5f</span>, <span class="number">0.5f</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>最后，由于立方体是六个面构成的，所以需要绘制十二个三角形（每个面两个），所以我们需要更改索引数组。记住三角形必须按逆时针顺序定义。如果你徒手做这件事，很容易犯错。一定要将你想定义的面摆在你的面前，确认顶点并以逆时针顺序绘制三角形。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>[] indices = <span class="keyword">new</span> <span class="keyword">int</span>[] &#123;</span><br><span class="line">    <span class="comment">// Front face</span></span><br><span class="line">    <span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>,</span><br><span class="line">    <span class="comment">// Top Face</span></span><br><span class="line">    <span class="number">4</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">4</span>, <span class="number">3</span>,</span><br><span class="line">    <span class="comment">// Right face</span></span><br><span class="line">    <span class="number">3</span>, <span class="number">2</span>, <span class="number">7</span>, <span class="number">5</span>, <span class="number">3</span>, <span class="number">7</span>,</span><br><span class="line">    <span class="comment">// Left face</span></span><br><span class="line">    <span class="number">6</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">6</span>, <span class="number">0</span>, <span class="number">4</span>,</span><br><span class="line">    <span class="comment">// Bottom face</span></span><br><span class="line">    <span class="number">2</span>, <span class="number">1</span>, <span class="number">6</span>, <span class="number">2</span>, <span class="number">6</span>, <span class="number">7</span>,</span><br><span class="line">    <span class="comment">// Back face</span></span><br><span class="line">    <span class="number">7</span>, <span class="number">6</span>, <span class="number">4</span>, <span class="number">7</span>, <span class="number">4</span>, <span class="number">5</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>为了更好的观察立方体，我们将更改’DummyGame’类中旋转模型的代码，使它沿着三个轴旋转。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Update rotation angle</span></span><br><span class="line"><span class="keyword">float</span> rotation = gameItem.getRotation().x + <span class="number">1.5f</span>;</span><br><span class="line"><span class="keyword">if</span> ( rotation &gt; <span class="number">360</span> ) &#123;</span><br><span class="line">    rotation = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">gameItem.setRotation(rotation, rotation, rotation);</span><br></pre></td></tr></table></figure>
+<p>就这样，现在能够显示一个旋转的三维立方体了。现在你可以编译和运行示例代码，会得到如下所示的东西。</p>
+<p><img src="/2019/02/07/Lwjglbook-07-textures/cube_no_depth_test.png" alt="没有开启深度测试的立方体"></p>
+<p>这个立方体有些奇怪。有些面没有被正确的绘制。发生了什么？立方体出现这个现象的原因，是组成立方体的三角形是以一种随即顺序绘制的。事实上距离较远的像素应该在距离较近的像素之前绘制，而不是现在这样。为了做到这一点，我们必须启用深度测试(<code>Depth Test</code>)。</p>
+<p>这可以在<code>Window</code>类的<code>init</code>方法中做到：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glEnable(GL_DEPTH_TEST);</span><br></pre></td></tr></table></figure>
+<p>现在立方体被正确地渲染了！</p>
+<p><img src="/2019/02/07/Lwjglbook-07-textures/cube_depth_test.png" alt="开启深度测试的立方体"></p>
+<p>如果你看了本章这一小节的代码，你可能会看到<code>Mesh</code>类做了一次小规模的调整。VBO的ID现在被储存在一个List中，以方便地迭代它们。</p>
+<h2 id="为立方体添加纹理"><a href="#为立方体添加纹理" class="headerlink" title="为立方体添加纹理"></a>为立方体添加纹理</h2><p>现在我们将把纹理应用到立方体上。纹理是用来绘制某个模型的像素的颜色的图像，可以认为纹理是包裹在3D模型周围的皮肤。你要做的就是将纹理图像中的点分配给模型中的顶点。这样，OpenGL能够根据纹理图像计算其他像素的颜色。</p>
+<p><img src="/2019/02/07/Lwjglbook-07-textures/texture_mapping.png" alt="纹理映射"></p>
+<p>纹理图像不需要与模型同样大小，它可以变大或变小。如果要处理的像素不能映射到纹理中的特定点，OpenGL将推断颜色。当创建纹理时，可以控制此过程。</p>
+<p>因此，为了将纹理应用到模型，我们必须做的是将纹理坐标分配给每个顶点。纹理坐标系有些不同于模型坐标系。首先，我们的纹理是二维纹理，所以坐标只有X和Y两个量。此外，原点是图像的左上角，X或Y的最大值都是1。</p>
+<p><img src="/2019/02/07/Lwjglbook-07-textures/texture_coordinates.png" alt="纹理坐标系"></p>
+<p>我们如何将纹理坐标与位置坐标联系起来呢？简单，就像传递颜色信息一样。我们创建了一个VBO，将为每个顶点储存纹理坐标。</p>
+<p>让我们为在三维立方体中应用纹理来修改代码吧。第一步是加载将被用作纹理的图像。对于这件事，在之前版本的LWJGL中，通常使用Slick2D库。在撰写本文的时候，这个库似乎与LWJGL 3不兼容，所以需要使用更冗长的方法。我们将使用一个名为<code>pngdecoder</code>的库，因此，需要在<code>pom.xml</code>文件中声明依赖。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.l33tlabs.twl<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>pngdecoder<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;pngdecoder.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>然后设置库使用的版本。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">    [...]</span><br><span class="line">    <span class="tag">&lt;<span class="name">pngdecoder.version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">pngdecoder.version</span>&gt;</span></span><br><span class="line">    [...]</span><br><span class="line"><span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>在一些教程中你可能看到，必须做的第一件事是调用<code>glEnable(GL_TEXTURE_2D)</code>来启用OpenGL的纹理功能。如果使用固定函数关系，这是正确的。但我们使用的是GLSL着色器，因此不再需要了。</p>
+<p>现在我们将创建一个新的<code>Texture</code>类，它将进行所有必要的步骤以加载纹理。纹理图像将位于<code>resources</code>文件夹中，可以作为CLASSPATH资源访问并使用输入流传递到<code>PNGDecoder</code>类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PNGDecoder decoder = <span class="keyword">new</span> PNGDecoder(</span><br><span class="line">     Texture.class.getResourceAsStream(fileName));</span><br></pre></td></tr></table></figure>
+<p>然后，我们需要解码PNG图像，并通过<code>PNGDecoder</code>的<code>decode</code>方法将其内容储存到缓冲区中。PNG图像以RGBA(RGB意为红绿蓝，A意为Alpha或透明度)格式解码，每个像素使用四个字节。</p>
+<p><code>decode</code>方法需要三个参数：</p>
+<ul>
+<li><code>buffer</code>: 储存解码后图像的<code>ByteBuffer</code>(因为每个像素是四个字节，其大小将是4*宽度*高度)。</li>
+<li><code>stride</code>: 指定从一行开始到下一行的起始字节的距离。现在它是每行的字节数。</li>
+<li><code>format</code>: 图像解码的目标格式(RGBA)。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ByteBuffer buf = ByteBuffer.allocateDirect(</span><br><span class="line">    <span class="number">4</span> * decoder.getWidth() * decoder.getHeight());</span><br><span class="line">decoder.decode(buf, decoder.getWidth() * <span class="number">4</span>, Format.RGBA);</span><br><span class="line">buf.flip();</span><br></pre></td></tr></table></figure>
+<p>一件关于OpenGL的重要事情，由于历史原因，要求纹理图像的大小(每个轴的像素数)必须是二的指数(2, 4, 8, 16, ….)。一些驱动消除了这种限制，但最好还是坚持以免出现问题。</p>
+<p>下一步是将纹理传递到显存中。首先，我们需要创建一个新的纹理ID。与该纹理相关的操作都要使用该ID，因此我们需要绑定它。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Create a new OpenGL texture </span></span><br><span class="line"><span class="keyword">int</span> textureId = glGenTextures();</span><br><span class="line"><span class="comment">// Bind the texture</span></span><br><span class="line">glBindTexture(GL_TEXTURE_2D, textureId);</span><br></pre></td></tr></table></figure>
+<p>然后需要告诉OpenGL如何解包我们的RGBA字节。由于每个数据大小都是一个字节，所以我们需要添加以下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glPixelStorei(GL_UNPACK_ALIGNMENT, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>最后我们可以传递材质数据：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">glTexImage2D(GL_TEXTURE_2D, <span class="number">0</span>, GL_RGBA, decoder.getWidth(),</span><br><span class="line">    decoder.getHeight(), <span class="number">0</span>, GL_RGBA, GL_UNSIGNED_BYTE, buf);</span><br></pre></td></tr></table></figure>
+<p><code>glTexImage2D</code>的参数如下：</p>
+<ul>
+<li><code>target</code>: 指定目标纹理(纹理类型)。现在是<code>GL_TEXTURE_2D</code>。</li>
+<li><code>level</code>: 指定纹理细节的等级。0级是基本图像等级。第n级是第n个多级渐远纹理(<code>Mipmap</code>)的图像。之后再谈这个问题。</li>
+<li><code>internal format</code>: 指定纹理中颜色分量的数量。</li>
+<li><code>width</code>: 指定纹理图像的宽度。</li>
+<li><code>height</code>: 指定纹理图像的高度。</li>
+<li><code>border</code>: 此值必须为0。</li>
+<li><code>format</code>: 指定像素数据的格式，现在为RGBA。</li>
+<li><code>type</code>: 指定像素数据的类型。现在，我们使用的是无符号字节。</li>
+<li><code>data</code>: 储存数据的缓冲区。</li>
+</ul>
+<p>在一些代码片段中，你可能会发现在调用<code>glTexImage2D</code>方法钱设置了一些过滤参数。过滤是指在缩放时如何绘制图像，以及如何修改像素。</p>
+<p>如果没有设置这些参数，纹理将不会显示。因此，在<code>glTexImage2D</code>方法调用之前，你会看到如下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);</span><br></pre></td></tr></table></figure>
+<p>这些参数基本上在表达，当一个像素与纹理坐标没有直接的一对一关联时，它将选择最近的纹理坐标点。</p>
+<p>到目前为止，我们不会设置这些参数。相反，我们将生成一个多级渐远纹理(<code>Mipmap</code>)。多级渐远纹理是由高细节纹理生成的逐级降低分辨率的纹理集合。当我们的物体缩放时，就将自动使用低分辨率的图像。</p>
+<p>为了生成多级渐远纹理，我们只需要编写以下代码(现在，我们把它放在<code>glTextImage2D</code>方法调用之后)：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glGenerateMipmap(GL_TEXTURE_2D);</span><br></pre></td></tr></table></figure>
+<p>就这样，我们已经成功地加载了纹理，现在需要使用它。正如之前所说的，我们需要把纹理坐标作为另一个VBO。因此，我们将修改<code>Mesh</code>类来接收浮点数组，其中储存纹理坐标，而不是颜色(我们可以同时有颜色和纹理，但为了简化它，我们将删除颜色)。构造函数现在是这样的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Mesh</span><span class="params">(<span class="keyword">float</span>[] positions, <span class="keyword">float</span>[] textCoords, <span class="keyword">int</span>[] indices,</span></span></span><br><span class="line"><span class="function"><span class="params">    Texture texture)</span></span></span><br></pre></td></tr></table></figure>
+<p>纹理坐标VBO与颜色VBO创建的方式相同。唯一的区别是它有两个元素而不是三个：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">vboId = glGenBuffers();</span><br><span class="line">vboIdList.add(vboId);</span><br><span class="line">textCoordsBuffer = MemoryUtil.memAllocFloat(textCoords.length);</span><br><span class="line">textCoordsBuffer.put(textCoords).flip();</span><br><span class="line">glBindBuffer(GL_ARRAY_BUFFER, vboId);</span><br><span class="line">glBufferData(GL_ARRAY_BUFFER, textCoordsBuffer, GL_STATIC_DRAW);</span><br><span class="line">glVertexAttribPointer(<span class="number">1</span>, <span class="number">2</span>, GL_FLOAT, <span class="keyword">false</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<p>现在我们需要在着色器中使用这些纹理。在顶点着色器中，第二个Uniform被修改了，因为现在它是一个<code>vec2</code>(也顺便更改了名称，所以记得在<code>Renderer</code>类中更改它)。顶点着色器就像之前一样，仅仅传递纹理坐标给片元着色器。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#version 330</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">layout</span> (<span class="keyword">location</span>=<span class="number">0</span>) <span class="keyword">in</span> <span class="type">vec3</span> position;</span><br><span class="line"><span class="keyword">layout</span> (<span class="keyword">location</span>=<span class="number">1</span>) <span class="keyword">in</span> <span class="type">vec2</span> texCoord;</span><br><span class="line"></span><br><span class="line"><span class="keyword">out</span> <span class="type">vec2</span> outTexCoord;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uniform</span> <span class="type">mat4</span> worldMatrix;</span><br><span class="line"><span class="keyword">uniform</span> <span class="type">mat4</span> projectionMatrix;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">gl_Position</span> = projectionMatrix * worldMatrix * <span class="type">vec4</span>(position, <span class="number">1.0</span>);</span><br><span class="line">    outTexCoord = texCoord;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在片元着色器中，我们使用那些纹理坐标来设置像素颜色：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#version 330</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">in</span>  <span class="type">vec2</span> outTexCoord;</span><br><span class="line"><span class="keyword">out</span> <span class="type">vec4</span> fragColor;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uniform</span> <span class="type">sampler2D</span> texture_sampler;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main()</span><br><span class="line">&#123;</span><br><span class="line">    fragColor = <span class="built_in">texture</span>(texture_sampler, outTexCoord);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在分析代码之前，让我们理清一些概念。显卡有几个空间或槽来储存纹理。每一个空间被称为纹理单元(<code>Texture Unit</code>)。当使用纹理时，我们必须设置想用的纹理。正如你所看到的，我们有一个新的名为<code>texture_sampler</code>的Uniform。该Uniform是<code>sampler2D</code>，并储存有我们希望使用的纹理单元的值。</p>
+<p>在<code>main</code>函数中，我们使用<code>texture</code>函数来使用纹理。这个函数有两个参数：取样器(<code>Sampler</code>)和纹理坐标，并返回正确的颜色。取样器Uniform允许使用多重纹理(<code>multi-texture</code>)，不过现在不是讨论这个话题的时候，但是我们会在稍后再尝试添加。</p>
+<p>因此，在<code>ShaderProgram</code>类中，我们将创建一个新的方法，允许为整数型Uniform设置数值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUniform</span><span class="params">(String uniformName, <span class="keyword">int</span> value)</span> </span>&#123;</span><br><span class="line">    glUniform1i(uniforms.get(uniformName), value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>Renderer</code>类的<code>init</code>方法中，我们将创建一个新的Uniform：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shaderProgram.createUniform(<span class="string">"texture_sampler"</span>);</span><br></pre></td></tr></table></figure>
+<p>此外，在<code>Renderer</code>类的<code>render</code>方法中，我们将Uniform的值设置为0(我们现在不使用多个纹理，所以只使用单元0)。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shaderProgram.setUniform(<span class="string">"texture_sampler"</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<p>最好，我们只需改变<code>Mesh</code>类的渲染方法就可以使用纹理。在方法开始的地方，我们添加以下几行代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Activate first texture unit</span></span><br><span class="line">glActiveTexture(GL_TEXTURE0);</span><br><span class="line"><span class="comment">// Bind the texture</span></span><br><span class="line">glBindTexture(GL_TEXTURE_2D, texture.getId());</span><br></pre></td></tr></table></figure>
+<p>我们基本上将<code>texture.getId()</code>所获得的纹理绑定到纹理单元0上。</p>
+<p>现在，我们刚刚修改了代码来支持纹理。现在我们需要为三维立方体设置纹理坐标。我们的纹理图像文件将是这样的：</p>
+<p><img src="/2019/02/07/Lwjglbook-07-textures/cube_texture.png" alt="立方体纹理"></p>
+<p>在我们的3D模型中，一共有八个顶点。我们首先定义每个顶点的正面纹理坐标。</p>
+<p><img src="/2019/02/07/Lwjglbook-07-textures/cube_texture_front_face.png" alt="立方体纹理的正面"></p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Vertex</th>
+<th>Texture Coordinate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V0</td>
+<td>(0.0, 0.0)</td>
+</tr>
+<tr>
+<td>V1</td>
+<td>(0.0, 0.5)</td>
+</tr>
+<tr>
+<td>V2</td>
+<td>(0.5, 0.5)</td>
+</tr>
+<tr>
+<td>V3</td>
+<td>(0.5, 0.0)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>然后，定义顶面纹理的映射。</p>
+<p><img src="/2019/02/07/Lwjglbook-07-textures/cube_texture_top_face.png" alt="正方体纹理的顶面"></p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Vertex</th>
+<th>Texture Coordinate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V4</td>
+<td>(0.0, 0.5)</td>
+</tr>
+<tr>
+<td>V5</td>
+<td>(0.5, 0.5)</td>
+</tr>
+<tr>
+<td>V0</td>
+<td>(0.0, 1.0)</td>
+</tr>
+<tr>
+<td>V3</td>
+<td>(0.5, 1.0)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>正如你所看到的，有一个问题，我们需要为同一个顶点(V0和V3)设置不同的纹理坐标。怎么样才能解决这个问题呢？解决这一问题的唯一方法是重复一些顶点并关联不同的纹理坐标。对于顶面，我们需要重复四个顶点并为它们分配正确的纹理坐标。</p>
+<p>因为前面、后面和侧面都使用相同的纹理，所以我们不需要重复这些顶点。在源代码中有完整的定义，但是我们需要从第8章跳到第20章了。最终的结果就像这样。</p>
+<p><img src="/2019/02/07/Lwjglbook-07-textures/cube_with_texture.png" alt="有纹理的立方体"></p>
+<p>在接下来的章节中，我们将学习如何加载由3D建模工具生成的模型，这样我们就不需要手动定义顶点和纹理坐标了(顺便一提，对于更复杂的模型，手动定义是不存在的)。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/LwjglBook/">LwjglBook</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/LWJGL/">LWJGL</a><a href="/tags/OpenGL/">OpenGL</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2019/02/07/Lwjglbook-07-textures/" data-title="使用LWJGL3开发3D游戏 第七章 纹理 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev">
+ <a href="/2019/02/07/Lwjglbook-08-camera/" title="使用LWJGL3开发3D游戏 第八章 摄像机">
+  <strong>上一篇：</strong><br>
+  <span>
+  使用LWJGL3开发3D游戏 第八章 摄像机</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/02/07/Lwjglbook-06-transformations/" title="使用LWJGL3开发3D游戏 第六章 变换">
+ <strong>下一篇：</strong><br> 
+ <span>使用LWJGL3开发3D游戏 第六章 变换
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '使用LWJGL3开发3D游戏 第七章 纹理',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#创建一个三维立方体"><span class="toc-number">1.</span> <span class="toc-text">创建一个三维立方体</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#为立方体添加纹理"><span class="toc-number">2.</span> <span class="toc-text">为立方体添加纹理</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.net/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/LwjglBook/" title="LwjglBook">LwjglBook<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>27</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>19</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LWJGL/" title="LWJGL">LWJGL<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Programming/" title="Programming">Programming<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nashorn/" title="Nashorn">Nashorn<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JNI/" title="JNI">JNI<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer">
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br>
+			喜欢Java，MineCraft和二次元。</p>
+	</section>
+	 
+	<div class="social-font">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons">
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2019 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

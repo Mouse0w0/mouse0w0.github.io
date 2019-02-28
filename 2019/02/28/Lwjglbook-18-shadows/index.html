@@ -1,0 +1,697 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu">
+  
+    <title>使用LWJGL3开发3D游戏 第十八章 阴影 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter18 英文标题：Shadows  阴影映射目前，我们能够表现光线如何影响三维场景中的对象。接收到更多光的物体比没有接收光的物体更亮。然而，我们仍无法投射阴影。阴影能增加3D场景的真实度，因此我们将在本章中添加对它的支持。 我们将使用一种被称为阴影映射（Shadow Mapping）的技">
+<meta name="keywords" content="Java,LWJGL,OpenGL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用LWJGL3开发3D游戏 第十八章 阴影">
+<meta property="og:url" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter18 英文标题：Shadows  阴影映射目前，我们能够表现光线如何影响三维场景中的对象。接收到更多光的物体比没有接收光的物体更亮。然而，我们仍无法投射阴影。阴影能增加3D场景的真实度，因此我们将在本章中添加对它的支持。 我们将使用一种被称为阴影映射（Shadow Mapping）的技">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/shadow_concepts_I.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/shadow_concepts_II.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/render_light_perspective.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/light_position.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/generic_light_pos_calculation.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/depth_map.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/depth_map_higher_distance.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/shadow_map_result.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/shadow_no_acne.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/depth_average_value.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/final_result.png">
+<meta property="og:updated_time" content="2019-02-28T11:47:16.785Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用LWJGL3开发3D游戏 第十八章 阴影">
+<meta name="twitter:description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter18 英文标题：Shadows  阴影映射目前，我们能够表现光线如何影响三维场景中的对象。接收到更多光的物体比没有接收光的物体更亮。然而，我们仍无法投射阴影。阴影能增加3D场景的真实度，因此我们将在本章中添加对它的支持。 我们将使用一种被称为阴影映射（Shadow Mapping）的技">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/shadow_concepts_I.png">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a href="https://afdian.net/@mouse">捐助作者</a></li>
+					
+						<li><a href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索">
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</ul></nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope="" itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/02/28/Lwjglbook-18-shadows/" title="使用LWJGL3开发3D游戏 第十八章 阴影" itemprop="url">使用LWJGL3开发3D游戏 第十八章 阴影</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  </p><p class="article-time">
+    <time datetime="2019-02-28T11:46:21.000Z" itemprop="datePublished"> 发表于 2019-02-28</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#阴影映射"><span class="toc-number">1.</span> <span class="toc-text">阴影映射</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#改进阴影映射"><span class="toc-number">2.</span> <span class="toc-text">改进阴影映射</span></a></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a href="https://ahbejarano.gitbook.io/lwjglgamedev/chapter18" target="_blank" rel="noopener">https://ahbejarano.gitbook.io/lwjglgamedev/chapter18</a></p>
+<p>英文标题：Shadows</p>
+</blockquote>
+<h2 id="阴影映射"><a href="#阴影映射" class="headerlink" title="阴影映射"></a>阴影映射</h2><p>目前，我们能够表现光线如何影响三维场景中的对象。接收到更多光的物体比没有接收光的物体更亮。然而，我们仍无法投射阴影。阴影能增加3D场景的真实度，因此我们将在本章中添加对它的支持。</p>
+<p>我们将使用一种被称为阴影映射（Shadow Mapping）的技术，这种技术被广泛使用于游戏中，且不会严重影响引擎性能。阴影映射看起来很容易理解，但是很难正确地实现它。或者更准确地说，很难用一种通用的，涵盖了一切可能并产生一致的效果的方法去实现它。</p>
+<p>我们将在此说明一种方法，它可以为你在大多数情况下添加阴影，但更重要的是，它将帮助你了解其局限性。这里介绍的代码远不是完美的，但我认为它很容易理解。它还被设计用于支持有向光（这我认为是更复杂的情况），但你将了解如何将其扩展以支持其他类型的光照（例如点光源）。如果你想获得更高级的效果，你应该使用更高级的技术，例如层叠阴影图（Cascaded Shadow Maps）。在任何情况下，这里解释的概念都仅仅作为基础。</p>
+<p>所以，让我们从思考如何检查特定区域（实际上是片元）是否在阴影中开始。在绘制这个区域的时候，我们可以发出射线投射到光源上，如果我们可以在不发生任何碰撞的情况下到达光源，那么像素就在光照中，反之，像素处于阴影中。</p>
+<p>下图展示了点光源的情况，点PA可以到达光源，但点PB和PC不行，因此它们位于阴影中。</p>
+<p><img src="/2019/02/28/Lwjglbook-18-shadows/shadow_concepts_I.png" alt="阴影概述I"></p>
+<p>那么，我们如何才能检查是否能以一种有效的方式发射出不发生碰撞的射线呢？理论上，光源可以投射出无限的光线，Name我们如何检查光线是否被遮挡？</p>
+<p>我们能做的不是投射光线，而是从光线透视图中观察3D场景，并从该位置渲染场景。我们可以将相机设置在光源位置并渲染场景，以便储存每个片元的深度。这相当于计算每个片元到光源的距离。最后，我们要做的是将光照所及的最小距离储存为阴影图。</p>
+<p>下图展示了一个悬浮在平面上并垂直于光线的立方体。</p>
+<p><img src="/2019/02/28/Lwjglbook-18-shadows/shadow_concepts_II.png" alt="阴影概述II"></p>
+<p>从光源的角度看，情况是这样的（颜色越深，越接近光源）。</p>
+<p><img src="/2019/02/28/Lwjglbook-18-shadows/render_light_perspective.png" alt="从光源的角度渲染"></p>
+<p>利用这些信息。我们可以像往常一样渲染3D场景，并以最小储存距离检查每个每个片元到光源的距离。如果距离小于阴影贴图中储存的值，则对象位于光照中，否则位于阴影中。我们可以让几个物体被同一光照照射，但我们储存最小距离。</p>
+<p>因此，阴影映射分为两步：</p>
+<ul>
+<li>首先，我们将场景从光照空间渲染为阴影图，以获得最小距离。</li>
+<li>其次，我们从摄像机的视角渲染场景。并使用深度图计算对象是否位于阴影中。</li>
+</ul>
+<p>为了渲染深度图，我们需要说说深度缓冲区（Depth-buffer）。当我们渲染一个场景时，所有深度信息都储存在一个名为“深度缓冲区”（又称“Z缓冲区（Z-buffer）”）的缓冲区中。深度信息是渲染的每个片元的$z$值。如果你从第一章回忆我们在渲染场景时，将正在渲染的场景从世界坐标转换为屏幕坐标。我们所绘制的坐标空间，对于$x$和$y$轴来说，坐标的范围为$0$到$1$。如果一个物体比其他对象原，我们必须通过透视投影矩阵计算它如何影响其$x$和$y$坐标。这不是根据$z$值自动计算的，它必须由我们来做。实际储存在$z$坐标中的是它在片元的深度，仅此而已。</p>
+<p>此外，在源代码中，我们启用了深度测试。在<code>Window</code>类中，我们添加如下行：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glEnable(GL_DEPTH_TEST);</span><br></pre></td></tr></table></figure>
+<p>通过添加这行，我们可以防止无法看到的片元被绘制出来，因为他们位于其他对象之后。在绘制片元之前，它的$z$值将与Z缓冲区中的$z$值进行比较。如果它的$z$值（它的距离）大于缓冲区的$z$值，则会被丢弃。请记住，这是在屏幕空间中完成的，因此，给定一对屏幕空间中范围为$[0, 1]$的$x$和$y$坐标，我们比较其片元的$z$值。同样，$z$值也在此范围内。</p>
+<p>深度缓冲区的存在是我们在执行任何渲染操作之前需要清除屏幕的原因。我们不仅需要清除颜色，还要清除深度信息：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">clear</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为了开始构建深度图，我们希望从光源的角度获得深度信息。我们需要在光源位置设置一个摄像头，渲染场景并将深度信息储存到纹理中，以便稍后访问它。</p>
+<p>因此，我们首先需要做的是添加对创建这些纹理的支持。我们将修改<code>Texture</code>类，通过添加新的构造函数来支持创建空纹理。此构造函数需要纹理的尺寸以及它储存的像素的格式。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Texture</span><span class="params">(<span class="keyword">int</span> width, <span class="keyword">int</span> height, <span class="keyword">int</span> pixelFormat)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.id = glGenTextures();</span><br><span class="line">    <span class="keyword">this</span>.width = width;</span><br><span class="line">    <span class="keyword">this</span>.height = height;</span><br><span class="line">    glBindTexture(GL_TEXTURE_2D, <span class="keyword">this</span>.id);</span><br><span class="line">    glTexImage2D(GL_TEXTURE_2D, <span class="number">0</span>, GL_DEPTH_COMPONENT, <span class="keyword">this</span>.width, <span class="keyword">this</span>.height, <span class="number">0</span>, pixelFormat, GL_FLOAT, (ByteBuffer) <span class="keyword">null</span>);</span><br><span class="line">    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);</span><br><span class="line">    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);</span><br><span class="line">    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);</span><br><span class="line">    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们将纹理环绕方式设置为<code>GL_CLAMP_TO_EDGE</code>，因为我们不希望在超出$[0, 1]$范围时重复纹理。</p>
+<p>所以，现在我们可以创建空的纹理，我们需要能够在其中渲染一个场景。为了做到它，我们需要使用帧缓冲区对象（Frame Buffers Objects，或称FBOs）。帧缓冲区是可以作为渲染终点的缓冲区集合。当我们渲染到屏幕上时，我们使用的是OpenGL的默认缓冲区。OpenGL允许我们使用FBO渲染到用户定义的缓冲区。我们将通过创建一个名为<code>ShadowMap</code>的新类，来隔离为阴影映射创建FBO过程的其余代码。如下就是那个类的定义。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.lwjglb.engine.graph;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.lwjgl.opengl.GL11.*;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.lwjgl.opengl.GL30.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ShadowMap</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SHADOW_MAP_WIDTH = <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SHADOW_MAP_HEIGHT = <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> depthMapFBO;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Texture depthMap;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ShadowMap</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// 创建FBO以渲染深度图</span></span><br><span class="line">        depthMapFBO = glGenFramebuffers();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建深度图纹理</span></span><br><span class="line">        depthMap = <span class="keyword">new</span> Texture(SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, GL_DEPTH_COMPONENT);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 绑定深度图纹理到FBO</span></span><br><span class="line">        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);</span><br><span class="line">        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap.getId(), <span class="number">0</span>);</span><br><span class="line">        <span class="comment">// 仅设置深度</span></span><br><span class="line">        glDrawBuffer(GL_NONE);</span><br><span class="line">        glReadBuffer(GL_NONE);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Exception(<span class="string">"Could not create FrameBuffer"</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 解绑</span></span><br><span class="line">        glBindFramebuffer(GL_FRAMEBUFFER, <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Texture <span class="title">getDepthMapTexture</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> depthMap;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getDepthMapFBO</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> depthMapFBO;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">cleanup</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        glDeleteFramebuffers(depthMapFBO);</span><br><span class="line">        depthMap.cleanup();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>ShadowMap</code>类定义了两个常量，用于确定储存深度图的纹理的大小。它还定义了两个属性，一个用于FBO，一个用于纹理。在构造函数中，创建一个新的FBO和一个新的<code>Texture</code>。对于FBO，将使用常量<code>GL_DEPTH_COMPONENT</code>作为像素格式，因为我们只对储存深度值感兴趣，然后将FBO绑定到纹理实例。</p>
+<p>以下几行代码显式地将FBO设置为不渲染任何颜色。FBO需要颜色缓冲区，但我们不需要，这就是为什么我们将颜色缓冲区设置为<code>GL_NONE</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">glDrawBuffer(GL_NONE);</span><br><span class="line">glReadBuffer(GL_NONE);</span><br></pre></td></tr></table></figure>
+<p>现在，我们准备在<code>Renderer</code>类中将场景从灯光透视渲染为FBO。为了做到它，我们将创建一组特殊的顶点和片元着色器。</p>
+<p>名为<code>depth_vertex.vs</code>的顶点着色器的定义如下：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#version 330</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">layout</span> (<span class="keyword">location</span>=<span class="number">0</span>) <span class="keyword">in</span> <span class="type">vec3</span> position;</span><br><span class="line"><span class="keyword">layout</span> (<span class="keyword">location</span>=<span class="number">1</span>) <span class="keyword">in</span> <span class="type">vec2</span> texCoord;</span><br><span class="line"><span class="keyword">layout</span> (<span class="keyword">location</span>=<span class="number">2</span>) <span class="keyword">in</span> <span class="type">vec3</span> vertexNormal;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uniform</span> <span class="type">mat4</span> modelLightViewMatrix;</span><br><span class="line"><span class="keyword">uniform</span> <span class="type">mat4</span> orthoProjectionMatrix;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">gl_Position</span> = orthoProjectionMatrix * modelLightViewMatrix * <span class="type">vec4</span>(position, <span class="number">1.0</span>f);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们希望接收与场景着色器相同的输入数据。但实际上，我们只需要坐标，但是为了尽可能多地重用代码，我们还是要传送其他数据。我们还需要一对矩阵。记住，我们必须以光源的角度渲染场景，所以我们需要将模型转换到光源的坐标空间。这是通过<code>modelLightViewMatrix</code>矩阵完成的，该矩阵类似于用于摄像机的模型观察矩阵。现在光源是我们的摄像机。</p>
+<p>然后我们需要将这些坐标转换到屏幕空间，也就是说，需要投影它们。这是计算平行光与点光源的阴影图时的区别之一。对于地昂扬，我们将使用透视投影（Perspective Projection）矩阵，就像我们正常渲染场景一样。相反，平行光以相同方式影响所有对象，而与距离无关。平行光源位于无穷远的点上，没有位置，只有方向。正交投影（Orthographic Projection）不会使远处的物体变小，因此，正交投影最适合平行光。</p>
+<p>片元着色器更简单。它只输出$z$坐标作为深度值。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#version 330</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">gl_FragDepth</span> = <span class="built_in">gl_FragCoord</span>.z;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>实际上，你可以删掉该行，因为我们只生成深度值，深度值将自动返回。</p>
+<p>一旦我们为深度渲染定义了新的着色器，就可以在<code>Renderer</code>类中使用它们。我们为初始化这些着色器定义了一个新方法，名为<code>setupDepthShader</code>，它将在其他着色器被初始化时调用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">setupDepthShader</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    depthShaderProgram = <span class="keyword">new</span> ShaderProgram();</span><br><span class="line">    depthShaderProgram.createVertexShader(Utils.loadResource(<span class="string">"/shaders/depth_vertex.vs"</span>));</span><br><span class="line">    depthShaderProgram.createFragmentShader(Utils.loadResource(<span class="string">"/shaders/depth_fragment.fs"</span>));</span><br><span class="line">    depthShaderProgram.link();</span><br><span class="line"></span><br><span class="line">    depthShaderProgram.createUniform(<span class="string">"orthoProjectionMatrix"</span>);</span><br><span class="line">    depthShaderProgram.createUniform(<span class="string">"modelLightViewMatrix"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在，我们需要创建一个新的方法，使用那些名为<code>renderDepthMap</code>的着色器。该方法将在主渲染方法中调用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">render</span><span class="params">(Window window, Camera camera, Scene scene, IHud hud)</span> </span>&#123;</span><br><span class="line">    clear();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在设置视口之前渲染深度图</span></span><br><span class="line">    renderDepthMap(window, camera, scene);</span><br><span class="line"></span><br><span class="line">    glViewport(<span class="number">0</span>, <span class="number">0</span>, window.getWidth(), window.getHeight());</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 其余的代码在这...</span></span><br></pre></td></tr></table></figure>
+<p>如果你浏览上述代码，将看到在设置视口之前，新方法就已经被调用。这是因为这个新方法将更高视口以匹配保存深度图的纹理的尺寸。因此，在完成<code>renderDepthMap</code>之后，我们将始终需要设置屏幕尺寸的视口（不检查窗口是否已调整大小）。</p>
+<p>现在让我们定义一下<code>renderDepthMap</code>方法。第一件事是绑定在<code>ShadowMap</code>类中创建的FBO，并设置视口以匹配纹理尺寸。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">glBindFramebuffer(GL_FRAMEBUFFER, shadowMap.getDepthMapFBO());</span><br><span class="line">glViewport(<span class="number">0</span>, <span class="number">0</span>, ShadowMap.SHADOW_MAP_WIDTH, ShadowMap.SHADOW_MAP_HEIGHT);</span><br></pre></td></tr></table></figure>
+<p>然后，清除深度缓冲区内容并绑定深度着色器。因为我们只处理深度值，所以不需要清除颜色信息。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">glClear(GL_DEPTH_BUFFER_BIT);</span><br><span class="line"></span><br><span class="line">depthShaderProgram.bind();</span><br></pre></td></tr></table></figure>
+<p>现在我们需要设置矩阵，接下来是棘手的部分。我们使用光源作为摄像机，所以需要创建一个需要一个坐标和三个角的观察矩阵。正如本章开头所说，我们只实现平行光，这种类型的光不定义位置，而是定义方向。如果我们使用点光源，这很容易，光源的位置就是观察矩阵的位置，但我们没有位置。</p>
+<p>我们将采用一种简单的方法来计算光的位置。平行光是由一个向量定义的，通常是归一化的，它指向光源所在的方向。我们把这个方向向量乘以一个可配置的因子，在这样它就为要绘制的场景定义了一个合理距离的点。我们将使用该方向来计算该观察矩阵的旋转角度。</p>
+<p><img src="/2019/02/28/Lwjglbook-18-shadows/light_position.png" alt="光源位置"></p>
+<p>这是计算灯光位置与旋转角度的代码片段：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span> lightAngleX = (<span class="keyword">float</span>)Math.toDegrees(Math.acos(lightDirection.z));</span><br><span class="line"><span class="keyword">float</span> lightAngleY = (<span class="keyword">float</span>)Math.toDegrees(Math.asin(lightDirection.x));</span><br><span class="line"><span class="keyword">float</span> lightAngleZ = <span class="number">0</span>;</span><br><span class="line">Matrix4f lightViewMatrix = transformation.updateLightViewMatrix(<span class="keyword">new</span> Vector3f(lightDirection).mul(light.getShadowPosMult()), <span class="keyword">new</span> Vector3f(lightAngleX, lightAngleY, lightAngleZ));</span><br></pre></td></tr></table></figure>
+<p>接下我们需要计算正交投影矩阵：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Matrix4f orthoProjMatrix = transformation.updateOrthoProjectionMatrix(orthCoords.left, orthCoords.right, orthCoords.bottom, orthCoords.top, orthCoords.near, orthCoords.far);</span><br></pre></td></tr></table></figure>
+<p>我们已经修改了<code>Transformation</code>类，以囊括光照观察矩阵和正交投影矩阵。此们有一个正交的二维投影矩阵，所以我们重命名了此前的方法和属性，你可以直接查看源代码中的定义。</p>
+<p>然后，我们按照<code>renderScene</code>方法渲染场景对象，但在光照空间坐标系中使用上述矩阵工作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">depthShaderProgram.setUniform(<span class="string">"orthoProjectionMatrix"</span>, orthoProjMatrix);</span><br><span class="line">Map&lt;Mesh, List&lt;GameItem&gt;&gt; mapMeshes = scene.getGameMeshes();</span><br><span class="line"><span class="keyword">for</span> (Mesh mesh : mapMeshes.keySet()) &#123;</span><br><span class="line">    mesh.renderList(mapMeshes.get(mesh), (GameItem gameItem) -&gt; &#123;</span><br><span class="line">        Matrix4f modelLightViewMatrix = transformation.buildModelViewMatrix(gameItem, lightViewMatrix);</span><br><span class="line">        depthShaderProgram.setUniform(<span class="string">"modelLightViewMatrix"</span>, modelLightViewMatrix);</span><br><span class="line">    &#125;</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 解绑</span></span><br><span class="line">depthShaderProgram.unbind();</span><br><span class="line">glBindFramebuffer(GL_FRAMEBUFFER, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<p>正交投影矩阵的参数是在平行光中定义的。将正交投影矩阵想象为一个边界框，其中包含我们要渲染的所有对象。当只投影适合该边界框的对象时，对象将可视。该边界框由6个参数定义：左、右、上、下、近、远。由于光源位置现在是原点，因此这些参数定义为原点到左或右（x轴）或上或下（y轴）或远或近（z轴）的距离。</p>
+<p>要使阴影图正常工作，最棘手的一点是确定灯光位置和正交投影矩阵的参数。这就是所有这些参数现在在<code>DirectionalLight</code>类中定义的方式，因此可以根据每个场景正确设置这些参数。</p>
+<p>你可以实现一个更自动的方法，通过计算摄像机截锥（Frustum）的中心，回到光的方向，建立一个包含场景中所有对象的正交投影。下图展示了如上所述的三维场景、相机位置、截锥（蓝色）、最佳光源位置以及红色的边界框。</p>
+<p><img src="/2019/02/28/Lwjglbook-18-shadows/generic_light_pos_calculation.png" alt="通用光源位置计算"></p>
+<p>上述方法的问题是很难计算，如果你有很小的物体，并且边界框很大，你可以会得到奇怪的结果。这里介绍的方法对于小场景更简单，你可以调整它以匹配你的模型（即使你可以选择显式设置灯光的位置，以避免相机远离原点移动时产生奇怪的效果）。如果你想要一个更通用的模板，可以应用到任何场景，你应该扩展它，以支持层叠阴影图。</p>
+<p>让我们继续。在使用深度图实际计算阴影之前，可以使用生成的纹理渲染一个正方形，以观察深度图的实际外观。在有一个旋转立方体漂浮在一个有垂直平行光的平面上的场景中，你可以得到如下结果。</p>
+<p><img src="/2019/02/28/Lwjglbook-18-shadows/depth_map.png" alt="深度图"></p>
+<p>如上所述，颜色越深，离光源的位置越近。深度图中光源位置的影响是什么？你可以修改平行光照的倍增因子，将看到在纹理中渲染的对象的大小不会变小。记住，我们使用的是正交投影矩阵，物体不会随着距离增大而变小。你将看到的是，所有的颜色都会变得更亮，如下所示：</p>
+<p><img src="/2019/02/28/Lwjglbook-18-shadows/depth_map_higher_distance.png" alt="更远的距离的深度图">  </p>
+<p>这是否意味着我们可以为光源选择一个较远的位置而不造成任何后果呢？答案是不行。如果光源离我们要渲染的对象太远，这些对象会超出正交投影矩阵定义的边界框。在此情况下，你会得到一个不错的白色纹理，但这是没用的阴影图。好的，那么我们只需增加边界框的大小，一切都会好的，对吗？答案也是不行。如果你为正交投影矩阵选用了巨大的尺寸，你的物体在纹理中会被绘制得很小，深度值甚至会重叠，造成奇怪的结果。好吧，所以你可以考虑增加纹理大小，但在此情况下，你是有限制的，纹理不能因使用巨大的编辑框而无限增大。</p>
+<p>因此，可以看到，选择光源的位置和正交投影的参数是一个复杂的平衡，这使得使用阴影图很难得到正确的效果。</p>
+<p>让我们回到渲染过程，一旦计算了深度图，我们就可以在渲染场景时使用它。首先，我们需要修改场景的顶点着色器。到目前为止，顶点着色器使用透视矩阵将顶点坐标从模型观察空间投影到屏幕空间。现在还需要使用投影矩阵从光照空间坐标投影顶点坐标，以用于片元着色器中计算阴影。</p>
+<p>顶点着色器是这样修改的：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#version 330</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">layout</span> (<span class="keyword">location</span>=<span class="number">0</span>) <span class="keyword">in</span> <span class="type">vec3</span> position;</span><br><span class="line"><span class="keyword">layout</span> (<span class="keyword">location</span>=<span class="number">1</span>) <span class="keyword">in</span> <span class="type">vec2</span> texCoord;</span><br><span class="line"><span class="keyword">layout</span> (<span class="keyword">location</span>=<span class="number">2</span>) <span class="keyword">in</span> <span class="type">vec3</span> vertexNormal;</span><br><span class="line"></span><br><span class="line"><span class="keyword">out</span> <span class="type">vec2</span> outTexCoord;</span><br><span class="line"><span class="keyword">out</span> <span class="type">vec3</span> mvVertexNormal;</span><br><span class="line"><span class="keyword">out</span> <span class="type">vec3</span> mvVertexPos;</span><br><span class="line"><span class="keyword">out</span> <span class="type">vec4</span> mlightviewVertexPos;</span><br><span class="line"><span class="keyword">out</span> <span class="type">mat4</span> outModelViewMatrix;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uniform</span> <span class="type">mat4</span> modelViewMatrix;</span><br><span class="line"><span class="keyword">uniform</span> <span class="type">mat4</span> projectionMatrix;</span><br><span class="line"><span class="keyword">uniform</span> <span class="type">mat4</span> modelLightViewMatrix;</span><br><span class="line"><span class="keyword">uniform</span> <span class="type">mat4</span> orthoProjectionMatrix;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">vec4</span> mvPos = modelViewMatrix * <span class="type">vec4</span>(position, <span class="number">1.0</span>);</span><br><span class="line">    <span class="built_in">gl_Position</span> = projectionMatrix * mvPos;</span><br><span class="line">    outTexCoord = texCoord;</span><br><span class="line">    mvVertexNormal = <span class="built_in">normalize</span>(modelViewMatrix * <span class="type">vec4</span>(vertexNormal, <span class="number">0.0</span>)).xyz;</span><br><span class="line">    mvVertexPos = mvPos.xyz;</span><br><span class="line">    mlightviewVertexPos = orthoProjectionMatrix * modelLightViewMatrix * <span class="type">vec4</span>(position, <span class="number">1.0</span>);</span><br><span class="line">    outModelViewMatrix = modelViewMatrix;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们为光照观察矩阵和正交投影矩阵使用了新的Uniform。</p>
+<p>在片元着色器中，我们将创建一个新的函数来计算阴影，代码如下：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> calcShadow(<span class="type">vec4</span> position)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">float</span> shadowFactor = <span class="number">1.0</span>;</span><br><span class="line">    <span class="type">vec3</span> projCoords = position.xyz;</span><br><span class="line">    <span class="comment">// 从屏幕坐标变换到纹理坐标</span></span><br><span class="line">    projCoords = projCoords * <span class="number">0.5</span> + <span class="number">0.5</span>;</span><br><span class="line">    <span class="keyword">if</span> ( projCoords.z &lt; <span class="built_in">texture</span>(shadowMap, projCoords.xy).r ) </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 当前片元不在阴影中</span></span><br><span class="line">        shadowFactor = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span> - shadowFactor;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该函数接收使用正交投影矩阵投影的光照观察空间的坐标。如果坐标在阴影中，则返回$0$，如果不在阴影中，则返回$1$。首先，将坐标转换为纹理坐标。屏幕坐标在$[-1, 1]$范围内，但纹理坐标在$[0, 1]$范围内。我们通过坐标从纹理中获取深度值，并将其与片元坐标的$z$值比较。如果$z$值低于储存在纹理中的值，则表示片元不再阴影中。</p>
+<p>在片元着色器中，<code>calcShadow</code>函数的返回值，用于调节点光源、聚光源和平行光对光照颜色的共享。环境光不受阴影的影响。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> shadow = calcShadow(mlightviewVertexPos);</span><br><span class="line">fragColor = <span class="built_in">clamp</span>(ambientC * <span class="type">vec4</span>(ambientLight, <span class="number">1</span>) + diffuseSpecularComp * shadow, <span class="number">0</span>, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>在<code>Renderer</code>类的<code>renderScene</code>方法中，我们只需要传递正交投影和光照观察矩阵到Uniform（我们还需要修改着色器的初始化方法以创建新的Uniform）。你可以在本书的源代码中了解。</p>
+<p>如果运行<code>DummyGame</code>类，该类已被修改为在带有平行光的平面上设置有悬浮的立方体，并可使用上下键修改角度，则应该看到如下情况。</p>
+<p><img src="/2019/02/28/Lwjglbook-18-shadows/shadow_map_result.png" alt="阴影图结果"></p>
+<p>虽然阴影已经工作了（你可以通过移动光照方向来检查），但是实际会出现一些问题。首先，被照亮的物体中有奇怪的线条。这种情况被称为阴影失真（Shadow Acne），它是由储存深度图的纹理的分辨率有限造成的。第二个问题是，阴影的边界不平滑，看起来很粗糙。原因同样，纹理分辨率。我们将解决这些问题，以提高阴影质量。</p>
+<h2 id="改进阴影映射"><a href="#改进阴影映射" class="headerlink" title="改进阴影映射"></a>改进阴影映射</h2><p>既然我们已经有了阴影映射机制，那么让我们来解决现有的问题。我们先从失真问题开始。深度图纹理大小有限，因此，可以将多个片元映射到该纹理深度中的同一像素。纹理深度储存最小深度，因此到最后，我们有几个片元共享相同的深度，尽管它们的距离不同。</p>
+<p>我们可以通过增加片元着色器中的深度比较来解决这个问题，我们添加了一个偏移。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> bias = <span class="number">0.05</span>;</span><br><span class="line"><span class="keyword">if</span> ( projCoords.z - bias &lt; <span class="built_in">texture</span>(shadowMap, projCoords.xy).r ) </span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 当前片元不在阴影中</span></span><br><span class="line">    shadowFactor = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在，阴影失真消失了。</p>
+<p><img src="/2019/02/28/Lwjglbook-18-shadows/shadow_no_acne.png" alt="无阴影失真"></p>
+<blockquote>
+<p>译者注：使用偏移来消除阴影失真又会造成悬浮（Peter Panning）问题，另请参阅<a href="https://learnopengl-cn.github.io/05%20Advanced%20Lighting/03%20Shadows/01%20Shadow%20Mapping/" target="_blank" rel="noopener">LearnOpenGL阴影映射</a>一文。</p>
+</blockquote>
+<p>现在我们要解决的是去阴影边缘问题，这也是由纹理分辨率引起的。对于每个片元，我们将使用片元的坐标值和周围的值对深度图进行采样。然后我们将计算平均值并将该值指定为阴影值。在此情况下，它的值不会是$0$和$1$但可以在两者间取值，以获得更平滑的边缘。</p>
+<p><img src="/2019/02/28/Lwjglbook-18-shadows/depth_average_value.png" alt="深度平均值"></p>
+<p>在纹理坐标中，周围值必须与当前片元位置保持一个像素距离。所以我们需要计算纹理坐标中一个像素的增量，它等于$1 / 纹理大小$。</p>
+<p>在片元着色器中，我们只需要修改阴影银子的计算来得到一个平均值。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> shadowFactor = <span class="number">0.0</span>;</span><br><span class="line"><span class="type">vec2</span> inc = <span class="number">1.0</span> / <span class="built_in">textureSize</span>(shadowMap, <span class="number">0</span>);</span><br><span class="line"><span class="keyword">for</span>(<span class="type">int</span> row = <span class="number">-1</span>; row &lt;= <span class="number">1</span>; ++row)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> col = <span class="number">-1</span>; col &lt;= <span class="number">1</span>; ++col)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">float</span> textDepth = <span class="built_in">texture</span>(shadowMap, projCoords.xy + <span class="type">vec2</span>(row, col) * inc).r; </span><br><span class="line">        shadowFactor += projCoords.z - bias &gt; textDepth ? <span class="number">1.0</span> : <span class="number">0.0</span>;        </span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br><span class="line">shadowFactor /= <span class="number">9.0</span>;</span><br></pre></td></tr></table></figure>
+<p>现在结果看起来更平滑了。</p>
+<p><img src="/2019/02/28/Lwjglbook-18-shadows/final_result.png" alt="最终结果"></p>
+<p>现在我们的示例看起来好多了。尽管如此，这里介绍的阴影映射技术仍有很大的改进空间。你可以查看如何解决悬浮（Peter Panning）效果（因偏移引起）和其他改进阴影边缘的计算。无论如何，有了这里所讲解的概念，你就有了开始修改示例的良好基础。</p>
+<p>为了渲染多个光源，你只需要为每个光源渲染一个深度图。在渲染场景时，你需要采样所有的深度图来计算合适的阴影系数。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/LwjglBook/">LwjglBook</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/LWJGL/">LWJGL</a><a href="/tags/OpenGL/">OpenGL</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2019/02/28/Lwjglbook-18-shadows/" data-title="使用LWJGL3开发3D游戏 第十八章 阴影 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2019/02/28/Lwjglbook-17-normal-mapping/" title="使用LWJGL3开发3D游戏 第十七章 法线贴图">
+ <strong>下一篇：</strong><br> 
+ <span>使用LWJGL3开发3D游戏 第十七章 法线贴图
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '使用LWJGL3开发3D游戏 第十八章 阴影',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#阴影映射"><span class="toc-number">1.</span> <span class="toc-text">阴影映射</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#改进阴影映射"><span class="toc-number">2.</span> <span class="toc-text">改进阴影映射</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.net/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/LwjglBook/" title="LwjglBook">LwjglBook<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>27</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>19</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LWJGL/" title="LWJGL">LWJGL<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Programming/" title="Programming">Programming<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nashorn/" title="Nashorn">Nashorn<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JNI/" title="JNI">JNI<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer">
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br>
+			喜欢Java，MineCraft和二次元。</p>
+	</section>
+	 
+	<div class="social-font">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons">
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2019 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

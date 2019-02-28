@@ -1,0 +1,685 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu">
+  
+    <title>使用LWJGL3开发3D游戏 第十四章 高度图 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter14 英文标题：Height Maps  本章中我们将学习如何使用高度图创建复杂的地形。在开始前，你会注意到我们做了一些重构。我们创建了一些新的包和移动了一些类以更好地组织它们。你可以在源代码中了解这些改变。 所以什么是高度图？高度图是用于生成三维地形的图像，它使用像素颜色来获取表面高">
+<meta name="keywords" content="Java,LWJGL,OpenGL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用LWJGL3开发3D游戏 第十四章 高度图">
+<meta property="og:url" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter14 英文标题：Height Maps  本章中我们将学习如何使用高度图创建复杂的地形。在开始前，你会注意到我们做了一些重构。我们创建了一些新的包和移动了一些类以更好地组织它们。你可以在源代码中了解这些改变。 所以什么是高度图？高度图是用于生成三维地形的图像，它使用像素颜色来获取表面高">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/heightmap.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/heightmap_grid.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/heightmap_coordinates.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/heightmap_vertices.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/heightmap_indices_i.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/heightmap_indices_ii.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/texture_coordinates_i.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/texture_coordinates_ii.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/normals_calc_i.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/normals_calc_ii.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/normals_calc_iii.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/terrain_construction_1.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/terrain_construction_2.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/terrain_result.png">
+<meta property="og:updated_time" content="2019-02-27T14:42:51.564Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用LWJGL3开发3D游戏 第十四章 高度图">
+<meta name="twitter:description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter14 英文标题：Height Maps  本章中我们将学习如何使用高度图创建复杂的地形。在开始前，你会注意到我们做了一些重构。我们创建了一些新的包和移动了一些类以更好地组织它们。你可以在源代码中了解这些改变。 所以什么是高度图？高度图是用于生成三维地形的图像，它使用像素颜色来获取表面高">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/heightmap.png">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a href="https://afdian.net/@mouse">捐助作者</a></li>
+					
+						<li><a href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索">
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</ul></nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope="" itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/02/07/Lwjglbook-14-height-maps/" title="使用LWJGL3开发3D游戏 第十四章 高度图" itemprop="url">使用LWJGL3开发3D游戏 第十四章 高度图</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  </p><p class="article-time">
+    <time datetime="2019-02-07T09:20:51.000Z" itemprop="datePublished"> 发表于 2019-02-07</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a href="https://ahbejarano.gitbook.io/lwjglgamedev/chapter14" target="_blank" rel="noopener">https://ahbejarano.gitbook.io/lwjglgamedev/chapter14</a></p>
+<p>英文标题：Height Maps</p>
+</blockquote>
+<p>本章中我们将学习如何使用高度图创建复杂的地形。在开始前，你会注意到我们做了一些重构。我们创建了一些新的包和移动了一些类以更好地组织它们。你可以在源代码中了解这些改变。</p>
+<p>所以什么是高度图？高度图是用于生成三维地形的图像，它使用像素颜色来获取表面高度。高度图图像通常是灰度图，它可以由<a href="http://planetside.co.uk/" target="_blank" rel="noopener">Terragen</a>等软件生成。一张高度图图像看起来就像这样。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/heightmap.png" alt="高度图"> </p>
+<p>上图就像你俯视一片陆地一样。利用上图，我们将构建由顶点组成的三角形所组成的网格。每个顶点的高度将根据图像的每个像素的颜色来计算。黑色是最低，白色是最高。</p>
+<p>我们将为图像的每个像素创建一组顶点，这些顶点将组成三角形，这些三角形将组成下图所示的网格。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/heightmap_grid.png" alt="高度图网格"> </p>
+<p>网格将组成一个巨大的四边形，它将会在X和Z轴上渲染，并根据像素颜色来改变它的Y轴高度。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/heightmap_coordinates.png" alt="高度图坐标系"> </p>
+<p>由高度图创建三维地形的过程可概括为以下步骤：</p>
+<ul>
+<li>加载储存高度图的图像(我们将使用一个<code>BufferedImage</code>实例以获取每个像素)。</li>
+<li>为每个图像像素创建一个顶点，其高度基于像素颜色。</li>
+<li>将正确的纹理坐标分配给顶点。</li>
+<li>设置索引以绘制与顶点相关的三角形。</li>
+</ul>
+<p>我们将创建一个名为<code>HeightMapMesh</code>的类，该类将基于高度图按以上步骤创建一个<code>Mesh</code>。让我们先看看该类定义的常量：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAX_COLOUR = <span class="number">255</span> * <span class="number">255</span> * <span class="number">255</span>;</span><br></pre></td></tr></table></figure>
+<p>如上所述，我们将基于高度图图像的每个像素的颜色来计算每个顶点的高度。图像通常是灰度图，对于PNG图像来说，这意味着每个像素的每个RGB值可以在0到255之间变化，因此我们有256个值来表示不同的高度。这可能足够了，但如果精度不够，我们可以使用三个RGB值以有更多的值，在此情况下，高度计算范围为0到255^3。我们将使用第二种方法，因此我们不局限于灰度图。</p>
+<p>接下来的常量是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> STARTX = -<span class="number">0.5f</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> STARTZ = -<span class="number">0.5f</span>;</span><br></pre></td></tr></table></figure>
+<p>网格将由一组顶点（一个顶点对应一个像素）构成，其X和Z坐标的范围如下</p>
+<ul>
+<li>X轴的范围为[-0.5, 0.5]，即[<code>STARTX</code>, <code>-STARTX</code>]。</li>
+<li>Z轴的范围为[-0.5, 0.5]，即[<code>STARTZ</code>, <code>-STARTZ</code>]。</li>
+</ul>
+<p>不用太过担心这些值，稍后得到的网格可以被缩放以适应世界的大小。关于Y轴，我们将设置<code>minY</code>和<code>maxY</code>两个参数，用于设置Y坐标的最低和最高值。这些参数并不是常数，因为我们可能希望在运行时更改它们，而不使用缩放。最后，地形将包含在范围为<code>[STARTX, -STARTX]</code>，<code>[minY, maxY]</code>，<code>[STARTZ, -STARTZ]</code>的立方体内。</p>
+<p>网格将会在<code>HeightMapMesh</code>类的构造函数中创建，该类的定义如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">HeightMapMesh</span><span class="params">(<span class="keyword">float</span> minY, <span class="keyword">float</span> maxY, String heightMapFile, String textureFile, <span class="keyword">int</span> textInc)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br></pre></td></tr></table></figure>
+<p>它接收Y轴的最小值和最大值，被用作高度图的图像文件名和要使用的纹理文件名。它还接受一个名为<code>textInc</code>的整数，这稍后再说明。</p>
+<p>我们在构造函数中做的第一件事就是将高度图图像加载到<code>BufferedImage</code>实例中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.minY = minY;</span><br><span class="line"><span class="keyword">this</span>.maxY = maxY;</span><br><span class="line"></span><br><span class="line">PNGDecoder decoder = <span class="keyword">new</span> PNGDecoder(getClass().getResourceAsStream(heightMapFile));</span><br><span class="line"><span class="keyword">int</span> height = decoder.getHeight();</span><br><span class="line"><span class="keyword">int</span> width = decoder.getWidth();</span><br><span class="line">ByteBuffer buf = ByteBuffer.allocateDirect(</span><br><span class="line">        <span class="number">4</span> * decoder.getWidth() * decoder.getHeight());</span><br><span class="line">decoder.decode(buf, decoder.getWidth() * <span class="number">4</span>, PNGDecoder.Format.RGBA);</span><br><span class="line">buf.flip();</span><br></pre></td></tr></table></figure>
+<p>然后，我们将纹理文件载入到一个<code>ByteBuffer</code>中，并设置构造<code>Mesh</code>所需的变量。<code>incx</code>和<code>incz</code>变量将储存每个顶点的X或Z坐标之间的最小间隔，因此<code>Mesh</code>包含在上述区域中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Texture texture = <span class="keyword">new</span> Texture(textureFile);</span><br><span class="line"></span><br><span class="line"><span class="keyword">float</span> incx = getWidth() / (width - <span class="number">1</span>);</span><br><span class="line"><span class="keyword">float</span> incz = Math.abs(STARTZ * <span class="number">2</span>) / (height - <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">List&lt;Float&gt; positions = <span class="keyword">new</span> ArrayList();</span><br><span class="line">List&lt;Float&gt; textCoords = <span class="keyword">new</span> ArrayList();</span><br><span class="line">List&lt;Integer&gt; indices = <span class="keyword">new</span> ArrayList();</span><br></pre></td></tr></table></figure>
+<p>之后，我们将遍历图像，为每个像素创建一个顶点，设置其纹理坐标与索引，以正确地定义组成<code>Mesh</code>的三角形。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> row = <span class="number">0</span>; row &lt; height; row++) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> col = <span class="number">0</span>; col &lt; width; col++) &#123;</span><br><span class="line">        <span class="comment">// 为当前位置创建顶点</span></span><br><span class="line">        positions.add(STARTX + col * incx); <span class="comment">// x</span></span><br><span class="line">        positions.add(getHeight(col, row, width, buf)); <span class="comment">// y</span></span><br><span class="line">        positions.add(STARTZ + row * incz); <span class="comment">// z</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 设置纹理坐标</span></span><br><span class="line">        textCoords.add((<span class="keyword">float</span>) textInc * (<span class="keyword">float</span>) col / (<span class="keyword">float</span>) width);</span><br><span class="line">        textCoords.add((<span class="keyword">float</span>) textInc * (<span class="keyword">float</span>) row / (<span class="keyword">float</span>) height);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建索引</span></span><br><span class="line">        <span class="keyword">if</span> (col &lt; width - <span class="number">1</span> &amp;&amp; row &lt; height - <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span> leftTop = row * width + col;</span><br><span class="line">            <span class="keyword">int</span> leftBottom = (row + <span class="number">1</span>) * width + col;</span><br><span class="line">            <span class="keyword">int</span> rightBottom = (row + <span class="number">1</span>) * width + col + <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">int</span> rightTop = row * width + col + <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">            indices.add(rightTop);</span><br><span class="line">            indices.add(leftBottom);</span><br><span class="line">            indices.add(leftTop);</span><br><span class="line"></span><br><span class="line">            indices.add(rightBottom);</span><br><span class="line">            indices.add(leftBottom);</span><br><span class="line">            indices.add(rightTop);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建顶点坐标的过程是不需要解释的。现在先别管为什么我们用一个数字乘以纹理坐标以及如何计算高度。你可以看到，对于每个顶点，我们定义两个三角形的索引(除非现在是最后一行或最后一列)。让我们用一个<strong>3×3</strong>的图像来想象它们是如何构造的。一个<strong>3×3</strong>的图像包含9个顶点，每因此有<strong>2×4</strong>个三角形组成4个正方形。下图展示了网格，每个顶点被命名为<code>Vrc</code>(r：行，c：列)。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/heightmap_vertices.png" alt="高度图顶点"></p>
+<p>当处理第一个顶点(V00)时，我们在红色阴影处定义了两个三角形的索引。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/heightmap_indices_i.png" alt="高度图索引I"> </p>
+<p>当处理第二个顶点(V01)时，我们在红色阴影处又定义了两个三角形的索引。但当处理第三个顶点(V02)时，我们不需要定义更多的索引，该行的所有三角形都已被定义。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/heightmap_indices_ii.png" alt="高度图索引II"> </p>
+<p>你可以很容易地想到其他顶点的处理过程是如何进行的。现在，一旦创建了所有的顶点位置、纹理坐标和索引，我们就只需要用所有这些数据创建<code>Mesh</code>和相关的<code>Material</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span>[] posArr = Utils.listToArray(positions);</span><br><span class="line"><span class="keyword">int</span>[] indicesArr = indices.stream().mapToInt(i -&gt; i).toArray();</span><br><span class="line"><span class="keyword">float</span>[] textCoordsArr = Utils.listToArray(textCoords);</span><br><span class="line"><span class="keyword">float</span>[] normalsArr = calcNormals(posArr, width, height);</span><br><span class="line"><span class="keyword">this</span>.mesh = <span class="keyword">new</span> Mesh(posArr, textCoordsArr, normalsArr, indicesArr);</span><br><span class="line">Material material = <span class="keyword">new</span> Material(texture, <span class="number">0.0f</span>);</span><br><span class="line">mesh.setMaterial(material);</span><br></pre></td></tr></table></figure>
+<p>你可以看到，我们根据顶点位置计算法线。在看如何计算法线之前，来看看如何获取高度吧。我们已经创建了一个名为<code>getHeight</code>的方法，它负责计算顶点的高度。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">float</span> <span class="title">getHeight</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> z, <span class="keyword">int</span> width, ByteBuffer buffer)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">byte</span> r = buffer.get(x * <span class="number">4</span> + <span class="number">0</span> + z * <span class="number">4</span> * width);</span><br><span class="line">    <span class="keyword">byte</span> g = buffer.get(x * <span class="number">4</span> + <span class="number">1</span> + z * <span class="number">4</span> * width);</span><br><span class="line">    <span class="keyword">byte</span> b = buffer.get(x * <span class="number">4</span> + <span class="number">2</span> + z * <span class="number">4</span> * width);</span><br><span class="line">    <span class="keyword">byte</span> a = buffer.get(x * <span class="number">4</span> + <span class="number">3</span> + z * <span class="number">4</span> * width);</span><br><span class="line">    <span class="keyword">int</span> argb = ((<span class="number">0xFF</span> &amp; a) &lt;&lt; <span class="number">24</span>) | ((<span class="number">0xFF</span> &amp; r) &lt;&lt; <span class="number">16</span>)</span><br><span class="line">            | ((<span class="number">0xFF</span> &amp; g) &lt;&lt; <span class="number">8</span>) | (<span class="number">0xFF</span> &amp; b);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.minY + Math.abs(<span class="keyword">this</span>.maxY - <span class="keyword">this</span>.minY) * ((<span class="keyword">float</span>) argb / (<span class="keyword">float</span>) MAX_COLOUR);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>该方法接受像素的X和Y坐标，图像的宽度以及与之相关的<code>ByteBuffer</code>，返回RGB颜色(R、G、B分量之和)并计算包含在<code>minY</code>和<code>maxY</code>之间的值(<code>minY</code>为黑色，<code>maxY</code>为白色)。</p>
+<p>你可以使用<code>BufferedImage</code>来编写一个更简单的方法，它有更方便的方法来获得RGB值，但这将使用AWT。记住AWT不能很好的兼容OSX，所以尽量避免使用它的类。</p>
+<p>现在来看看如何计算纹理坐标。第一个方法是将纹理覆盖整个网格，左上角的顶点纹理坐标为(0, 0)，右下角的顶点纹理坐标为(1, 1)。这种方法的问题是，纹理必须是巨大的，以便获得良好的渲染效果，否则纹理将会被过度拉伸。</p>
+<p>但我们仍然可以使用非常小的纹理，通过使用高效的技术来获得很好的效果。如果我们设置超出[1, 1]范围的纹理坐标，我们将回到原点并重新开始计算。下图表示在几个正方形中平铺相同的纹理，并超出了[1, 1]范围。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/texture_coordinates_i.png" alt="纹理坐标I"> </p>
+<p>这是我们在设置纹理坐标时所要做的。我们将一个参数乘以纹理坐标(计算好像整个网格被纹理包裹的情况)，即<code>textInc</code>参数，以增加在相邻顶点之间使用的纹理像素数。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/texture_coordinates_ii.png" alt="纹理坐标II"> </p>
+<p>目前唯一没有解决的是法线计算。记住我们需要法线，光照才能正确地应用于地形。没有法线，无论光照如何，地形将以相同的颜色渲染。我们在这里使用的方法不一定是最高效的，但它将帮助你理解如何自动计算法线。如果你搜索其他解决方案，可能会发现更有效的方法，只使用相邻点的高度而不需要做交叉相乘操作。尽管如此，这仅需要在启动时完成，这里的方法不会对性能造成太大的损害。</p>
+<p>让我们用图解的方式解释如何计算一个法线值。假设我们有一个名为<strong>P0</strong>的顶点。我们首先计算其周围每个顶点(<strong>P1</strong>, <strong>P2</strong>, <strong>P3</strong>, <strong>P4</strong>)和与连接这些点的面相切的向量。这些向量(<strong>V1</strong>, <strong>V2</strong>, <strong>V3</strong>, <strong>V4</strong>)是通过将每个相邻点与<strong>P0</strong>相减(例如<strong>V1 = P1 - P0</strong>)得到的。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/normals_calc_i.png" alt="法线计算I"> </p>
+<p>然后，我们计算连接每一个相邻点的平面的法线。这是与之前计算得到的向量交叉相乘计算的。例如，向量<strong>V1</strong>与<strong>V2</strong>所在的平面(蓝色阴影部分)的法线是由<strong>V1</strong>和<strong>V2</strong>交叉相乘得到的，即<strong>V12 = V1 × V2</strong>。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/normals_calc_ii.png" alt="法线计算II"> </p>
+<p>如果我们计算完毕其他平面的法线(<strong>V23 = V2 × V3</strong>，<strong>V34 = V3 × V4</strong>，<strong>V41 = V4 × V1</strong>)，则法线<strong>P0</strong>就是周围所有平面法线(归一化后)之和：<strong>N0 = V12 + V23 + V34 + V41</strong>。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/normals_calc_iii.png" alt="法线计算III"></p>
+<p>法线计算的方法实现如下所示。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">float</span>[] calcNormals(<span class="keyword">float</span>[] posArr, <span class="keyword">int</span> width, <span class="keyword">int</span> height) &#123;</span><br><span class="line">    Vector3f v0 = <span class="keyword">new</span> Vector3f();</span><br><span class="line">    Vector3f v1 = <span class="keyword">new</span> Vector3f();</span><br><span class="line">    Vector3f v2 = <span class="keyword">new</span> Vector3f();</span><br><span class="line">    Vector3f v3 = <span class="keyword">new</span> Vector3f();</span><br><span class="line">    Vector3f v4 = <span class="keyword">new</span> Vector3f();</span><br><span class="line">    Vector3f v12 = <span class="keyword">new</span> Vector3f();</span><br><span class="line">    Vector3f v23 = <span class="keyword">new</span> Vector3f();</span><br><span class="line">    Vector3f v34 = <span class="keyword">new</span> Vector3f();</span><br><span class="line">    Vector3f v41 = <span class="keyword">new</span> Vector3f();</span><br><span class="line">    List&lt;Float&gt; normals = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    Vector3f normal = <span class="keyword">new</span> Vector3f();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> row = <span class="number">0</span>; row &lt; height; row++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> col = <span class="number">0</span>; col &lt; width; col++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (row &gt; <span class="number">0</span> &amp;&amp; row &lt; height -<span class="number">1</span> &amp;&amp; col &gt; <span class="number">0</span> &amp;&amp; col &lt; width -<span class="number">1</span>) &#123;</span><br><span class="line">                <span class="keyword">int</span> i0 = row*width*<span class="number">3</span> + col*<span class="number">3</span>;</span><br><span class="line">                v0.x = posArr[i0];</span><br><span class="line">                v0.y = posArr[i0 + <span class="number">1</span>];</span><br><span class="line">                v0.z = posArr[i0 + <span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">                <span class="keyword">int</span> i1 = row*width*<span class="number">3</span> + (col-<span class="number">1</span>)*<span class="number">3</span>;</span><br><span class="line">                v1.x = posArr[i1];</span><br><span class="line">                v1.y = posArr[i1 + <span class="number">1</span>];</span><br><span class="line">                v1.z = posArr[i1 + <span class="number">2</span>];                    </span><br><span class="line">                v1 = v1.sub(v0);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">int</span> i2 = (row+<span class="number">1</span>)*width*<span class="number">3</span> + col*<span class="number">3</span>;</span><br><span class="line">                v2.x = posArr[i2];</span><br><span class="line">                v2.y = posArr[i2 + <span class="number">1</span>];</span><br><span class="line">                v2.z = posArr[i2 + <span class="number">2</span>];</span><br><span class="line">                v2 = v2.sub(v0);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">int</span> i3 = (row)*width*<span class="number">3</span> + (col+<span class="number">1</span>)*<span class="number">3</span>;</span><br><span class="line">                v3.x = posArr[i3];</span><br><span class="line">                v3.y = posArr[i3 + <span class="number">1</span>];</span><br><span class="line">                v3.z = posArr[i3 + <span class="number">2</span>];</span><br><span class="line">                v3 = v3.sub(v0);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">int</span> i4 = (row-<span class="number">1</span>)*width*<span class="number">3</span> + col*<span class="number">3</span>;</span><br><span class="line">                v4.x = posArr[i4];</span><br><span class="line">                v4.y = posArr[i4 + <span class="number">1</span>];</span><br><span class="line">                v4.z = posArr[i4 + <span class="number">2</span>];</span><br><span class="line">                v4 = v4.sub(v0);</span><br><span class="line">                    </span><br><span class="line">                v1.cross(v2, v12);</span><br><span class="line">                v12.normalize();</span><br><span class="line"></span><br><span class="line">                v2.cross(v3, v23);</span><br><span class="line">                v23.normalize();</span><br><span class="line">                    </span><br><span class="line">                v3.cross(v4, v34);</span><br><span class="line">                v34.normalize();</span><br><span class="line">                    </span><br><span class="line">                v4.cross(v1, v41);</span><br><span class="line">                v41.normalize();</span><br><span class="line">                    </span><br><span class="line">                normal = v12.add(v23).add(v34).add(v41);</span><br><span class="line">                normal.normalize();</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                normal.x = <span class="number">0</span>;</span><br><span class="line">                normal.y = <span class="number">1</span>;</span><br><span class="line">                normal.z = <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            normal.normalize();</span><br><span class="line">            normals.add(normal.x);</span><br><span class="line">            normals.add(normal.y);</span><br><span class="line">            normals.add(normal.z);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> Utils.listToArray(normals);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后，为了创建更大的地形，我们有两个选择：</p>
+<ul>
+<li>创建更大的高度图</li>
+<li>重用高度图并将其平铺在三维空间中。高度图将像一个地形块，在世界上像瓷砖一样平移。为了做到这一点，高度图边缘的像素必须是相同的(左侧边缘必须与右侧相同，上侧边缘必须与下侧相同)，以避免块之间的间隙。</li>
+</ul>
+<p>我们将使用第二种方法(并选择适当的高度图)。为了做到它，我们将创建一个名为<code>Terrain</code>的类，该类将创建一个正方形的高度图块，定义如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.lwjglb.engine.items;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.lwjglb.engine.graph.HeightMapMesh;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Terrain</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> GameItem[] gameItems;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Terrain</span><span class="params">(<span class="keyword">int</span> blocksPerRow, <span class="keyword">float</span> scale, <span class="keyword">float</span> minY, <span class="keyword">float</span> maxY, String heightMap, String textureFile, <span class="keyword">int</span> textInc)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        gameItems = <span class="keyword">new</span> GameItem[blocksPerRow * blocksPerRow];</span><br><span class="line">        HeightMapMesh heightMapMesh = <span class="keyword">new</span> HeightMapMesh(minY, maxY, heightMap, textureFile, textInc);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> row = <span class="number">0</span>; row &lt; blocksPerRow; row++) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> col = <span class="number">0</span>; col &lt; blocksPerRow; col++) &#123;</span><br><span class="line">                <span class="keyword">float</span> xDisplacement = (col - ((<span class="keyword">float</span>) blocksPerRow - <span class="number">1</span>) / (<span class="keyword">float</span>) <span class="number">2</span>) * scale * HeightMapMesh.getXLength();</span><br><span class="line">                <span class="keyword">float</span> zDisplacement = (row - ((<span class="keyword">float</span>) blocksPerRow - <span class="number">1</span>) / (<span class="keyword">float</span>) <span class="number">2</span>) * scale * HeightMapMesh.getZLength();</span><br><span class="line"></span><br><span class="line">                GameItem terrainBlock = <span class="keyword">new</span> GameItem(heightMapMesh.getMesh());</span><br><span class="line">                terrainBlock.setScale(scale);</span><br><span class="line">                terrainBlock.setPosition(xDisplacement, <span class="number">0</span>, zDisplacement);</span><br><span class="line">                gameItems[row * blocksPerRow + col] = terrainBlock;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> GameItem[] getGameItems() &#123;</span><br><span class="line">        <span class="keyword">return</span> gameItems;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>让我们详解整个过程，我们拥有由以下坐标定义的块(X和Z使用之前定义的常量)。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/terrain_construction_1.png" alt="地形构建I"></p>
+<p>假设我们创建了一个由3×3块网格构成的地形。我们假设我们不会缩放地形块(也就是说，变量<code>blocksPerRow</code>是<strong>3</strong>而变量<code>scale</code>将会是<strong>1</strong>)。我们希望网格的中央在坐标系的(0, 0)。</p>
+<p>我们需要移动块，这样顶点就变成如下坐标。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/terrain_construction_2.png" alt="地形构建II"></p>
+<p>移动是通过调用<code>setPosition</code>方法实现的，但记住，我们所设置的是一个位移而不是一个位置。如果你看到上图，你会发现中央块不需要任何移动，它已经定位在适当的坐标上。绘制绿色顶点需要在X轴上位移<strong>-1</strong>，而绘制蓝色顶点需要在X轴上位移<strong>+1</strong>。计算X位移的公式，要考虑到缩放和块的宽度，公式如下：</p>
+<script type="math/tex; mode=display">xDisplacement=(col - (blocksPerRow -1 ) / 2) \times scale \times width</script><p>Z位移的公式为：</p>
+<script type="math/tex; mode=display">zDisplacement=(row - (blocksPerRow -1 ) / 2) \times scale \times height</script><p>如果在<code>DummyGame</code>类中创建一个<code>Terrain</code>实例，我们可以得到如图所示的效果。</p>
+<p><img src="/2019/02/07/Lwjglbook-14-height-maps/terrain_result.png" alt="地形结果"> </p>
+<p>你可以在地形周围移动相机，看看它是如何渲染的。由于还没有实现碰撞检测，你可以穿过它并从上面看它。由于我们已经启用了面剔除，当从下面观察时，地形的某些部分不会渲染。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/LwjglBook/">LwjglBook</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/LWJGL/">LWJGL</a><a href="/tags/OpenGL/">OpenGL</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2019/02/07/Lwjglbook-14-height-maps/" data-title="使用LWJGL3开发3D游戏 第十四章 高度图 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev">
+ <a href="/2019/02/07/Lwjglbook-15-terrain-collisions/" title="使用LWJGL3开发3D游戏 第十五章 地形碰撞">
+  <strong>上一篇：</strong><br>
+  <span>
+  使用LWJGL3开发3D游戏 第十五章 地形碰撞</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/02/07/Lwjglbook-13-sky-box-and-some-optimizations/" title="使用LWJGL3开发3D游戏 第十三章 天空盒与一些优化">
+ <strong>下一篇：</strong><br> 
+ <span>使用LWJGL3开发3D游戏 第十三章 天空盒与一些优化
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '使用LWJGL3开发3D游戏 第十四章 高度图',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ 
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.net/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/LwjglBook/" title="LwjglBook">LwjglBook<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>27</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>19</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LWJGL/" title="LWJGL">LWJGL<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Programming/" title="Programming">Programming<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nashorn/" title="Nashorn">Nashorn<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JNI/" title="JNI">JNI<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer">
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br>
+			喜欢Java，MineCraft和二次元。</p>
+	</section>
+	 
+	<div class="social-font">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons">
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2019 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

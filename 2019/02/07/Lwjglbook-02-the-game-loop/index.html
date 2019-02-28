@@ -1,0 +1,661 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu">
+  
+    <title>使用LWJGL3开发3D游戏 第二章 游戏循环 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter2 英文标题：The Game Loop  在本章中，我们将通过创建我们的游戏循环来开始开发游戏引擎。游戏循环是每个游戏的核心部分。它基本上是一个无休止的循环，负责周期地处理用户的输入、更新游戏状态和渲染图形到屏幕上。 下面的代码片段展示了游戏循环的结构： 12345while (ke">
+<meta name="keywords" content="Java,LWJGL,OpenGL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用LWJGL3开发3D游戏 第二章 游戏循环">
+<meta property="og:url" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-02-the-game-loop/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter2 英文标题：The Game Loop  在本章中，我们将通过创建我们的游戏循环来开始开发游戏引擎。游戏循环是每个游戏的核心部分。它基本上是一个无休止的循环，负责周期地处理用户的输入、更新游戏状态和渲染图形到屏幕上。 下面的代码片段展示了游戏循环的结构： 12345while (ke">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-02-27T14:42:50.924Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用LWJGL3开发3D游戏 第二章 游戏循环">
+<meta name="twitter:description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter2 英文标题：The Game Loop  在本章中，我们将通过创建我们的游戏循环来开始开发游戏引擎。游戏循环是每个游戏的核心部分。它基本上是一个无休止的循环，负责周期地处理用户的输入、更新游戏状态和渲染图形到屏幕上。 下面的代码片段展示了游戏循环的结构： 12345while (ke">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a href="https://afdian.net/@mouse">捐助作者</a></li>
+					
+						<li><a href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索">
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</ul></nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope="" itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/02/07/Lwjglbook-02-the-game-loop/" title="使用LWJGL3开发3D游戏 第二章 游戏循环" itemprop="url">使用LWJGL3开发3D游戏 第二章 游戏循环</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  </p><p class="article-time">
+    <time datetime="2019-02-06T17:21:44.000Z" itemprop="datePublished"> 发表于 2019-02-07</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#线程问题"><span class="toc-number">1.</span> <span class="toc-text">线程问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#平台差异（OS-X）"><span class="toc-number">2.</span> <span class="toc-text">平台差异（OS X）</span></a></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a href="https://ahbejarano.gitbook.io/lwjglgamedev/chapter2" target="_blank" rel="noopener">https://ahbejarano.gitbook.io/lwjglgamedev/chapter2</a></p>
+<p>英文标题：The Game Loop</p>
+</blockquote>
+<p>在本章中，我们将通过创建我们的游戏循环来开始开发游戏引擎。游戏循环是每个游戏的核心部分。它基本上是一个无休止的循环，负责周期地处理用户的输入、更新游戏状态和渲染图形到屏幕上。</p>
+<p>下面的代码片段展示了游戏循环的结构：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (keepOnRunning) &#123;</span><br><span class="line">    handleInput();</span><br><span class="line">    updateGameState();</span><br><span class="line">    render();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>那么，就这样了吗？我们已经完成游戏循环了吗？显然，还没有。上面的代码有很多缺陷。首先，游戏循环运行的速度将取决于运行它的计算机。如果计算机足够快，用户甚至看不到游戏中发生了什么。此外，这个游戏循环将消耗所有的计算机资源。</p>
+<p>因此，我们需要游戏循环独立于运行的计算机，尝试以恒定速率运行。让我们假设，我们希望游戏以每秒50帧（50 Frames Per Second，50 FPS）的恒定速率运行。那么我们的游戏循环代码可能是这样的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">double</span> secsPerFrame = <span class="number">1.0</span>d / <span class="number">50.0</span>d;</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (keepOnRunning) &#123;</span><br><span class="line">    <span class="keyword">double</span> now = getTime();</span><br><span class="line">    handleInput();</span><br><span class="line">    updateGameState();</span><br><span class="line">    render();</span><br><span class="line">    sleep(now + secsPerFrame – getTime());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个游戏循环很简单，可以用于一些游戏，但是它也存在一些缺陷。首先，它假定我们的更新和渲染方法适合以50FPS（即，<code>secsPerFrame</code>等于20毫秒）的速度更新。</p>
+<p>此外，我们的计算机可能会优先考虑暂停游戏循环运行一段时间，来运行其他的任务。因此，我们可能会在非常不稳定的时间周期更新游戏状态，这是不符合游戏物理的要求的。</p>
+<p>最后，线程休眠的时间精度仅仅只有0.1秒，所以即使我们的更新和渲染方法没有消耗时间，我们也不会以恒定的速率更新。所以，正如你看到的，问题没那么简单。</p>
+<p>在网上你可以找到大量的游戏循环的变种。在本书中，我们将用一个不太复杂的，在大多数情况下都能正常工作的方法。我们将用的方法通常被称为固定步长游戏循环（Fixed Step Game Loop）。</p>
+<p>首先，我们可能想要单独控制游戏状态被更新的周期和游戏被渲染到屏幕的周期。为什么我们要这么做？因为，以恒定的速率更新游戏状态更为重要，特别是如果我们使用物理引擎。相反，如果我们的渲染没有及时完成，在运行我们的游戏循环时渲染旧帧是没有意义的。我们可以灵活地跳过某些帧。</p>
+<p>让我们看看现在我们的游戏循环是什么样子的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">double</span> secsPerUpdate = <span class="number">1.0</span>d / <span class="number">30.0</span>d;</span><br><span class="line"><span class="keyword">double</span> previous = getTime();</span><br><span class="line"><span class="keyword">double</span> steps = <span class="number">0.0</span>;</span><br><span class="line"><span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">  <span class="keyword">double</span> loopStartTime = getTime();</span><br><span class="line">  <span class="keyword">double</span> elapsed = loopStartTime - previous;</span><br><span class="line">  previous = current;</span><br><span class="line">  steps += elapsed;</span><br><span class="line"></span><br><span class="line">  handleInput();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (steps &gt;= secsPerUpdate) &#123;</span><br><span class="line">    updateGameState();</span><br><span class="line">    steps -= secsPerUpdate;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render();</span><br><span class="line">  sync(current);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过这个游戏循环，我们可以在固定的周期更新我们的游戏状态。但是我们如何避免耗尽计算机资源，使它不连续渲染呢？这在<code>sync</code>方法中实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">sync</span><span class="params">(<span class="keyword">double</span> loopStartTime)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">float</span> loopSlot = <span class="number">1f</span> / <span class="number">50</span>;</span><br><span class="line">   <span class="keyword">double</span> endTime = loopStartTime + loopSlot; </span><br><span class="line">   <span class="keyword">while</span>(getTime() &lt; endTime) &#123;</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">           Thread.sleep(<span class="number">1</span>);</span><br><span class="line">       &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;&#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>那么我们在上述方法中做了什么呢？总而言之，我们计算我们的游戏循环迭代应该持续多长时间（它被储存在<code>loopSlot</code>变量中），我们休眠的时间取决于我们在循环中花费的时间。但我们不做一整段时间的休眠，而是进行一些小的休眠。这允许其他任务运行，并避免我们之前提到的休眠准确性问题。然后，我们要做的是：</p>
+<ol>
+<li>计算我们应该退出这个方法的时间（这个变量名为<code>endTime</code>），并开始我们的游戏循环的另一个迭代。</li>
+<li>比较当前时间和结束时间，如果我们没有到达结束时间，就休眠1毫秒。</li>
+</ol>
+<p>现在是时候构造我们的代码，以便开始编写游戏引擎的第一个版本了。但在此之前，我们来讨论一下控制渲染速率的另一种方法。在上面的代码中，我们做微休眠，以控制我们需要等待的时间。但是我们可以选择另一种方法来限制帧率。我们可以使用<strong>垂直同步</strong>（Vertical Synchronization）。垂直同步的主要目的是避免画面撕裂。什么是画面撕裂？这是一种显示现象，当我们更新图像储存区时，它正被渲染。结果是一部分图像显示先前的图像，而另一部分图像显示正在渲染的图像。如果我们启用垂直同步，当GPU中的内容正被渲染到屏幕上时，我们不会向GPU发送数据。</p>
+<blockquote>
+<p>Now it is time to structure our code base in order to start writing our first version of our Game Engine. But before doing that we will talk about another way of controlling the rendering rate. In the code presented above, we are doing micro-sleeps in order to control how much time we need to wait. But we can choose another approach in order to limit the frame rate. We can use v-sync (vertical synchronization). The main purpose of v-sync is to avoid screen tearing. What is screen tearing? It’s a visual effect that is produced when we update the video memory while it’s being rendered. The result will be that part of the image will represent the previous image and the other part will represent the updated one. If we enable v-sync we won’t send an image to the GPU while it is being rendered onto the screen.</p>
+</blockquote>
+<p>当我们开启垂直同步时，我们将与显卡的刷新率同步，显卡将以恒定的帧率渲染。用下面一行代码启用它：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glfwSwapInterval(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>有了上面的代码，就意味着我们，至少在一个屏幕更新被绘制到屏幕之前，必须等待。事实上，我们不是直接绘制到屏幕上。相反，我们将数据储存在缓冲区中，然后用下面的方法交换它：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glfwSwapBuffers(windowHandle);</span><br></pre></td></tr></table></figure>
+<p>因此，如果我们启用垂直同步，我们就可以实现稳定的帧率，而不需要进行微休眠来检查更新时间。此外，帧率将与我们的显卡刷新率相匹配。也就是说，如果它设定为60Hz（60FPS），那么我们就有60FPS。我们可以通过在<code>glfwSwapInterval</code>方法中设置高于1的数字来降低这个速率（如果我们设置为2，我们将得到30FPS）。</p>
+<p>让我们整理一下源代码。首先，我们将把所有的GLFW窗口初始化代码封装在一个名为<code>Window</code>的类中，提供一些基本的参数（如标题和大小）。<code>Window</code>类还提供一个方法以便在游戏循环中检测按下的按键：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isKeyPressed</span><span class="params">(<span class="keyword">int</span> keyCode)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> glfwGetKey(windowHandle, keyCode) == GLFW_PRESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>除了有初始化代码以外，<code>Window</code>类还需要知道调整大小。因此，需要设置一个回调方法，在窗口大小被调整时调用它。回调方法将接收帧缓冲区的以像素为单位的宽度和高度（绘制区域，简单来说就是显示区域）。如果希望得到帧缓冲区的宽度、高度，你可以使用<code>glfwSetWindowSizeCallback</code>方法。屏幕坐标不一定对应像素（例如，具有视网膜显示屏（Retina Display）的Mac设备）。因为我们将在进行OpenGL调用时使用这些信息，所以我们要注意像素不在屏幕坐标中。您可以通过GLFW的文档了解更多信息。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Setup resize callback</span></span><br><span class="line">glfwSetFramebufferSizeCallback(windowHandle, (window, width, height) -&gt; &#123;</span><br><span class="line">    Window.<span class="keyword">this</span>.width = width;</span><br><span class="line">    Window.<span class="keyword">this</span>.height = height;</span><br><span class="line">    Window.<span class="keyword">this</span>.setResized(<span class="keyword">true</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>我们还将创建一个<code>Renderer</code>类，它将处理我们游戏的渲染。现在，它仅会有一个空的<code>init</code>方法，和另一个用预设的颜色清空屏幕的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">clear</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后我们将创建一个名为<code>IGameLogic</code>的接口，它封装了我们的游戏逻辑。这样，我们就可以让游戏引擎在不同的游戏上重复使用。该接口将具有获取输入、更新游戏状态和渲染游戏内容的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IGameLogic</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">input</span><span class="params">(Window window)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">update</span><span class="params">(<span class="keyword">float</span> interval)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">render</span><span class="params">(Window window)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后我们将创建一个名为<code>GameEngine</code>的类，它将包含我们游戏循环的代码。这个类实现了<code>Runnable</code>接口，因为游戏循环将要在单独的线程中运行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GameEngine</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//..[Removed code]..</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Thread gameLoopThread;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">GameEngine</span><span class="params">(String windowTitle, <span class="keyword">int</span> width, <span class="keyword">int</span> height, <span class="keyword">boolean</span> vsSync, IGameLogic gameLogic)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        gameLoopThread = <span class="keyword">new</span> Thread(<span class="keyword">this</span>, <span class="string">"GAME_LOOP_THREAD"</span>);</span><br><span class="line">        window = <span class="keyword">new</span> Window(windowTitle, width, height, vsSync);</span><br><span class="line">        <span class="keyword">this</span>.gameLogic = gameLogic;</span><br><span class="line">        <span class="comment">//..[Removed code]..</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p><code>vSync</code>参数允许我们选择是否使用垂直同步。你可以看到我们创建了一个新线程，它将执行我们的<code>GameEngine</code>类的<code>run</code>方法，该类包含着我们的游戏循环：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    gameLoopThread.start();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        init();</span><br><span class="line">        gameLoop();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception excp) &#123;</span><br><span class="line">        excp.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们的<code>GameEngine</code>类提供了一个<code>start</code>方法，它仅会启动我们的线程，因此<code>run</code>方法将异步执行。<code>run</code>方法将执行初始化，并运行游戏循环，直到我们关闭窗口。在线程中初始化GLFW是非常重要的，在之后我们才更新它。因此，在<code>init</code>方法中，我们的窗口和<code>Renderer</code>实例被初始化。</p>
+<p>在源代码中，你将看到我们创建了其他辅助类，例如<code>Timer</code>（它将提供用于计算已经过的时间的实用方法），并在我们的游戏循环逻辑中使用它们。</p>
+<p>我们的<code>GameEngine</code>类只是将<code>input</code>和<code>update</code>方法委托给<code>IGameLogic</code>实例。在<code>render</code>方法中，它也委托给<code>IGameLogic</code>实例并更新窗口。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">input</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    gameLogic.input(window);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">(<span class="keyword">float</span> interval)</span> </span>&#123;</span><br><span class="line">    gameLogic.update(interval);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">render</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    gameLogic.render(window);</span><br><span class="line">    window.update();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在程序的入口，包含<code>main</code>方法的类只会创建一个<code>GameEngine</code>实例并启动它。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">boolean</span> vSync = <span class="keyword">true</span>;</span><br><span class="line">            IGameLogic gameLogic = <span class="keyword">new</span> DummyGame();</span><br><span class="line">            GameEngine gameEng = <span class="keyword">new</span> GameEngine(<span class="string">"GAME"</span>,</span><br><span class="line">                <span class="number">600</span>, <span class="number">480</span>, vSync, gameLogic);</span><br><span class="line">            gameEng.start();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception excp) &#123;</span><br><span class="line">            excp.printStackTrace();</span><br><span class="line">            System.exit(-<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后，我们只需要创建游戏逻辑类，本章中我们实现一个简单的游戏逻辑。它只会在按下上或下键时，增加或降低窗口的颜色缓冲区的清空颜色。<code>render</code>方法将会用这个颜色清空窗口的颜色缓冲区。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DummyGame</span> <span class="keyword">implements</span> <span class="title">IGameLogic</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> direction = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> color = <span class="number">0.0f</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Renderer renderer;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">DummyGame</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        renderer = <span class="keyword">new</span> Renderer();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        renderer.init();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">input</span><span class="params">(Window window)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> ( window.isKeyPressed(GLFW_KEY_UP) ) &#123;</span><br><span class="line">            direction = <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> ( window.isKeyPressed(GLFW_KEY_DOWN) ) &#123;</span><br><span class="line">            direction = -<span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            direction = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">(<span class="keyword">float</span> interval)</span> </span>&#123;</span><br><span class="line">        color += direction * <span class="number">0.01f</span>;</span><br><span class="line">        <span class="keyword">if</span> (color &gt; <span class="number">1</span>) &#123;</span><br><span class="line">            color = <span class="number">1.0f</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> ( color &lt; <span class="number">0</span> ) &#123;</span><br><span class="line">            color = <span class="number">0.0f</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">render</span><span class="params">(Window window)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> ( window.isResized() ) &#123;</span><br><span class="line">            glViewport(<span class="number">0</span>, <span class="number">0</span>, window.getWidth(), window.getHeight());</span><br><span class="line">            window.setResized(<span class="keyword">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        window.setClearColor(color, color, color, <span class="number">0.0f</span>);</span><br><span class="line">        renderer.clear();</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>render</code>方法中，当窗口大小被调整时，我们接收通知，以便更新视口将坐标中心定位到窗口的中心。</p>
+<p>我们创建的类层次结构将帮助我们将游戏引擎代码与具体的游戏代码分开。虽然现在可能看起来没有必要，但是我们将每个游戏的通用代码从具体的游戏的逻辑、美术作品和资源中分离出来，以便重用我们的游戏引擎。在之后的章节中，我们需要重构这个类层次结构，因为我们的游戏引擎变得更加复杂。</p>
+<h2 id="线程问题"><a href="#线程问题" class="headerlink" title="线程问题"></a>线程问题</h2><p>如果你试图在OSX系统运行前面提供的源代码，你将得到这样的错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread &quot;GAME_LOOP_THREAD&quot; java.lang.ExceptionInInitializerError</span><br></pre></td></tr></table></figure>
+<p>这是什么意思？这是因为GLFW库的某些功能不能在<code>Thread</code>中调用，因为这不是主<code>Thread</code>。我们在初始化时，包括在<code>GameEngine</code>类的<code>init</code>方法中的窗口创建。这些方法都是由同一类的<code>run</code>方法调用，而<code>run</code>方法由一个新的<code>Thread</code>调用，而不是用来启动程序的主线程调用。</p>
+<p>这是GLFW库的一个限制，它基本上意味着我们应该避免为游戏循环创建新线程。我们可以尝试在主线程中创建所有与窗口相关的东西，但是我们将无法渲染任何东西。问题是，OpenGL的调用需要在创建其上下文（Context）的同一个<code>Thread</code>中运行。</p>
+<p>在Windows和Linux平台上，即使我们不能使用主线程初始化GLFW，示例代码也能运行。问题就是在OS X平台上，所以我们需要更改我们的<code>GameEngine</code>类的<code>run</code>方法的代码使它支持这个平台，就像这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    String osName = System.getProperty(<span class="string">"os.name"</span>);</span><br><span class="line">    <span class="keyword">if</span> ( osName.contains(<span class="string">"Mac"</span>) ) &#123;</span><br><span class="line">        gameLoopThread.run();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        gameLoopThread.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们正做的是当我们在OS X平台上时，忽略游戏循环线程，并直接在主线程运行游戏循环代码。这不是一个完美的解决方案，但它将允许你在Mac上运行示例。在论坛上找到的其他解决方案（例如启动JVM时添加<code>-XstartOnFirstThread</code>参数）似乎不起作用。</p>
+<p>在将来，如果LWJGL提供其他的GUI库来检查此限制是否适用于它们，这可能是值得探讨的。（非常感谢Timo Bühlmann指出这个问题。）</p>
+<blockquote>
+<p>In the future it may be interesting to explore if LWJGL provides other GUI libraries to check if this restriction applies to them. (Many thanks to Timo Bühlmann for pointing out this issue).</p>
+</blockquote>
+<h2 id="平台差异（OS-X）"><a href="#平台差异（OS-X）" class="headerlink" title="平台差异（OS X）"></a>平台差异（OS X）</h2><p>你可以运行上面的代码在Windows或Linux上，但我们仍需要为OSX平台做一些修改。正如GLFW文档中所描述的：</p>
+<blockquote>
+<p>目前OS X仅支持的OpenGL 3.x和4.x版本的上下文是向上兼容的。OS X 10.7 Lion支持OpenGL 3.2版本和OS X 10.9 Mavericks支持OpenGL 3.3和4.1版本。在任何情况下，你的GPU需要支持指定版本的OpenGL，以便上下文创建成功。</p>
+</blockquote>
+<p>因此，为了支持在之后的章节中介绍的特性，我们需要将这些代码添加到<code>Window</code>类创建窗口代码之前：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, <span class="number">3</span>);</span><br><span class="line">glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, <span class="number">2</span>);</span><br><span class="line">glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);</span><br><span class="line">glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);</span><br></pre></td></tr></table></figure>
+<p>这将使程序使用OpenGL 3.2到4.1之间的最高版本。如果没有这些代码，就会使用旧版本的OpenGL。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/LwjglBook/">LwjglBook</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/LWJGL/">LWJGL</a><a href="/tags/OpenGL/">OpenGL</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2019/02/07/Lwjglbook-02-the-game-loop/" data-title="使用LWJGL3开发3D游戏 第二章 游戏循环 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev">
+ <a href="/2019/02/07/Lwjglbook-03-a-brief-about-coordinates/" title="使用LWJGL3开发3D游戏 第三章 坐标简介">
+  <strong>上一篇：</strong><br>
+  <span>
+  使用LWJGL3开发3D游戏 第三章 坐标简介</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/02/07/Lwjglbook-01-first-steps/" title="使用LWJGL3开发3D游戏 第一章 事前准备">
+ <strong>下一篇：</strong><br> 
+ <span>使用LWJGL3开发3D游戏 第一章 事前准备
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '使用LWJGL3开发3D游戏 第二章 游戏循环',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#线程问题"><span class="toc-number">1.</span> <span class="toc-text">线程问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#平台差异（OS-X）"><span class="toc-number">2.</span> <span class="toc-text">平台差异（OS X）</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.net/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/LwjglBook/" title="LwjglBook">LwjglBook<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>27</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>19</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LWJGL/" title="LWJGL">LWJGL<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Programming/" title="Programming">Programming<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nashorn/" title="Nashorn">Nashorn<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JNI/" title="JNI">JNI<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer">
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br>
+			喜欢Java，MineCraft和二次元。</p>
+	</section>
+	 
+	<div class="social-font">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons">
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2019 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

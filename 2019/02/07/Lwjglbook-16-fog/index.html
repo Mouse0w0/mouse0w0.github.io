@@ -1,0 +1,671 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu">
+  
+    <title>使用LWJGL3开发3D游戏 第十六章 雾 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter16 英文标题：Fog  在处理更复杂的问题之前，我们将学习如何在游戏引擎中创建雾特效。有了这个特效，就可以模拟遥远的物体变暗，似乎消失在浓雾中。 让我们来确定定义雾的属性是什么。第一个是雾的颜色。在现实世界中，雾是灰色的，但我们可以利用这个特效来模拟不同颜色的雾覆盖的区域。还有一个属">
+<meta name="keywords" content="Java,LWJGL,OpenGL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用LWJGL3开发3D游戏 第十六章 雾">
+<meta property="og:url" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-16-fog/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter16 英文标题：Fog  在处理更复杂的问题之前，我们将学习如何在游戏引擎中创建雾特效。有了这个特效，就可以模拟遥远的物体变暗，似乎消失在浓雾中。 让我们来确定定义雾的属性是什么。第一个是雾的颜色。在现实世界中，雾是灰色的，但我们可以利用这个特效来模拟不同颜色的雾覆盖的区域。还有一个属">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-16-fog/linear_model.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-16-fog/exponential_model.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-16-fog/fog_effect.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-16-fog/glowing_fog.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-16-fog/fog_at_night.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-16-fog/fog_clear_colour_black.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-16-fog/fog_clear_colour_grey.png">
+<meta property="og:updated_time" content="2019-02-27T14:42:51.590Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用LWJGL3开发3D游戏 第十六章 雾">
+<meta name="twitter:description" content="本文翻译自：https://ahbejarano.gitbook.io/lwjglgamedev/chapter16 英文标题：Fog  在处理更复杂的问题之前，我们将学习如何在游戏引擎中创建雾特效。有了这个特效，就可以模拟遥远的物体变暗，似乎消失在浓雾中。 让我们来确定定义雾的属性是什么。第一个是雾的颜色。在现实世界中，雾是灰色的，但我们可以利用这个特效来模拟不同颜色的雾覆盖的区域。还有一个属">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2019/02/07/Lwjglbook-16-fog/linear_model.png">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a href="https://afdian.net/@mouse">捐助作者</a></li>
+					
+						<li><a href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索">
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</ul></nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope="" itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/02/07/Lwjglbook-16-fog/" title="使用LWJGL3开发3D游戏 第十六章 雾" itemprop="url">使用LWJGL3开发3D游戏 第十六章 雾</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  </p><p class="article-time">
+    <time datetime="2019-02-07T09:21:05.000Z" itemprop="datePublished"> 发表于 2019-02-07</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a href="https://ahbejarano.gitbook.io/lwjglgamedev/chapter16" target="_blank" rel="noopener">https://ahbejarano.gitbook.io/lwjglgamedev/chapter16</a></p>
+<p>英文标题：Fog</p>
+</blockquote>
+<p>在处理更复杂的问题之前，我们将学习如何在游戏引擎中创建雾特效。有了这个特效，就可以模拟遥远的物体变暗，似乎消失在浓雾中。</p>
+<p>让我们来确定定义雾的属性是什么。第一个是雾的颜色。在现实世界中，雾是灰色的，但我们可以利用这个特效来模拟不同颜色的雾覆盖的区域。还有一个属性是雾的浓度。</p>
+<p>因此，为了使用雾特效，我们需要找到一种方法，当3D场景的物体远离摄像机时，使它们褪色到雾的颜色。靠近摄像机的物体不会受到雾的影响，但远处的物体将无法分辨。因此，我们需要计算一个参数，可以用来混合雾的颜色与每个片元的颜色，以模拟雾特效。这个参数取决于与摄像机相距的距离。</p>
+<p>让我们把这个参数命名为<code>fogFactor</code>，并设定它的范围为0到1。当<code>fogFactor</code>为1时，意味着物体完全不会受到雾的影响，也就是说，它是较近的物体。当<code>fogFactor</code>为0时，意味着物体完全隐藏在雾中。</p>
+<p>然后，计算雾色的方程如下：</p>
+<script type="math/tex; mode=display">finalColour = (1 - fogFactor) \cdot fogColour + fogFactor \cdot framentColour</script><ul>
+<li><strong>finalColour</strong> 是使用雾特效的最终颜色。</li>
+<li><strong>fogFactor</strong> 是控制雾的颜色与片元的颜色如何混合的参数，它基本上控制物体的可见性。</li>
+<li><strong>fogColour</strong> 是雾的颜色。</li>
+<li><strong>fragmentColour</strong> 没有使用雾特效的片元颜色。</li>
+</ul>
+<p>现在我们需要找到一种方法来基于距离计算<strong>fogFactor</strong>。我们可以选择不同的模型，首先使用线性模型。这是一个给定距离以线性方式改变<strong>fogFactor</strong>的模型。</p>
+<p>线性模型由以下参数定义：</p>
+<ul>
+<li><strong>fogStart</strong>: 开始使用雾特效的距离。</li>
+<li><strong>fogFinish</strong>: 雾特效达到最大值的距离。</li>
+<li><strong>distance</strong>: 到摄像机的距离。</li>
+</ul>
+<p>有了这些参数，方程就会是这样的：</p>
+<script type="math/tex; mode=display">\displaystyle fogFactor = \frac{(fogFinish - distance)}{(fogFinish - fogStart)}</script><p>对于距离低于<strong>fogStart</strong>的物体我们简单地设置<strong>fogFactor</strong>为<strong>1</strong>。下图表明了<strong>fogFactor</strong>是如何随着距离变化而变化的。</p>
+<p><img src="/2019/02/07/Lwjglbook-16-fog/linear_model.png" alt="线性模型"></p>
+<p>线性模型易于计算，但不太真实，因为它不考虑雾气浓度。实际上雾往往以更平滑的方式增加。所以下一个合适的模型是指数模型。该模型的方程如下：</p>
+<script type="math/tex; mode=display">\displaystyle focFactor = e^{-(distance \cdot fogDensity)^{exponent}} = \frac{1}{e^{(distance \cdot fogDensity)^{exponent}}}</script><p>其中的新变量如下所述：</p>
+<ul>
+<li><strong>fogDensity</strong> 是雾的厚度或浓度。</li>
+<li><strong>exponent</strong> 用来控制雾随着距离的增加增长的速度。</li>
+</ul>
+<p>下图显示了两个图形，分别设置了不同的<strong>exponent</strong>值（蓝线为<strong>2</strong>，红线为<strong>4</strong>）。</p>
+<p><img src="/2019/02/07/Lwjglbook-16-fog/exponential_model.png" alt="指数模型"></p>
+<p>在代码中，我们将使用一个公式，让它可以为<strong>exponent</strong>设置不同的值（你可以很容易地修改示例以使用不同的值）。</p>
+<p>既然已经解释过这个原理了，我们就可以实现它。我们将在场景的片元着色器中实现雾特效，因为这有我们需要的所有变量。我们将首先定义一个储存雾属性的结构体。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">struct Fog</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> active;</span><br><span class="line">    <span class="type">vec3</span> colour;</span><br><span class="line">    <span class="type">float</span> density;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>active</code>属性用于激活或关闭雾特效。雾属性将通过另一个被称作<code>fog</code>的Uniform传递给着色器。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">uniform</span> Fog fog;</span><br></pre></td></tr></table></figure>
+<p>我们还将创建一个包含着雾属性的名为<code>Fog</code>的新类，它是另一个POJO（Plain Ordinary Java Object，简单的Java对象）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.lwjglb.engine.graph.weather;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.joml.Vector3f;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Fog</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> active;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Vector3f colour;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> density;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Fog NOFOG = <span class="keyword">new</span> Fog();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Fog</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        active = <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">this</span>.colour = <span class="keyword">new</span> Vector3f(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">this</span>.density = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Fog</span><span class="params">(<span class="keyword">boolean</span> active, Vector3f colour, <span class="keyword">float</span> density)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.colour = colour;</span><br><span class="line">        <span class="keyword">this</span>.density = density;</span><br><span class="line">        <span class="keyword">this</span>.active = active;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">   <span class="comment">// Getters and setters here….</span></span><br></pre></td></tr></table></figure>
+<p>我们将在<code>Scene</code>类中添加一个<code>Fog</code>示例。默认情况下，<code>Scene</code>类将初始化一个<code>Fog</code>示例到常量<code>NOFOG</code>，用于模拟关闭雾特效的情况。</p>
+<p>因为添加了一个新的Uniform类型，所以我们需要修改<code>ShaderProgram</code>类来创建和初始化雾的Uniform。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">createFogUniform</span><span class="params">(String uniformName)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    createUniform(uniformName + <span class="string">".active"</span>);</span><br><span class="line">    createUniform(uniformName + <span class="string">".colour"</span>);</span><br><span class="line">    createUniform(uniformName + <span class="string">".density"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUniform</span><span class="params">(String uniformName, Fog fog)</span> </span>&#123;</span><br><span class="line">    setUniform(uniformName + <span class="string">".activeFog"</span>, fog.isActive() ? <span class="number">1</span> : <span class="number">0</span>);</span><br><span class="line">    setUniform(uniformName + <span class="string">".colour"</span>, fog.getColour() );</span><br><span class="line">    setUniform(uniformName + <span class="string">".density"</span>, fog.getDensity());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>Renderer</code>类中，我们只需要在<code>setupSceneShader</code>方法中创建Uniform：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sceneShaderProgram.createFogUniform(<span class="string">"fog"</span>);</span><br></pre></td></tr></table></figure>
+<p>然后在<code>renderScene</code>方法中使用它：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sceneShaderProgram.setUniform(<span class="string">"fog"</span>, scene.getFog());</span><br></pre></td></tr></table></figure>
+<p>我们现在可以在游戏中定义雾特效，但是需要回到片元着色器中应用雾特效。我们将创建一个名为<code>calcFog</code>的函数，函数定义如下。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">vec4</span> calcFog(<span class="type">vec3</span> pos, <span class="type">vec4</span> colour, Fog fog)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">float</span> <span class="built_in">distance</span> = <span class="built_in">length</span>(pos);</span><br><span class="line">    <span class="type">float</span> fogFactor = <span class="number">1.0</span> / <span class="built_in">exp</span>( (<span class="built_in">distance</span> * fog.density)* (<span class="built_in">distance</span> * fog.density));</span><br><span class="line">    fogFactor = <span class="built_in">clamp</span>( fogFactor, <span class="number">0.0</span>, <span class="number">1.0</span> );</span><br><span class="line"></span><br><span class="line">    <span class="type">vec3</span> resultColour = <span class="built_in">mix</span>(fog.colour, colour.xyz, fogFactor);</span><br><span class="line">    <span class="keyword">return</span> <span class="type">vec4</span>(resultColour.xyz, colour.w);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如你所见，我们首先计算到顶点的距离。顶点坐标定义在<code>pos</code>变量中，我们只需要计算长度。然后利用<strong>exponent</strong>为2的指数模型（相当于乘以两次）计算雾参数。我们得到的<code>fogFactor</code>的范围在<strong>0</strong>到<strong>1</strong>之间，并使用<code>mix</code>函数。在GLSL中，<code>min</code>函数被用于混合雾色和图元颜色（由颜色变量定义）。相当于使用如下方程：</p>
+<script type="math/tex; mode=display">resultColour = (1 - fogFactor) \cdot fog.colour + fogFactor \cdot colour</script><p>我们还为颜色保留了<strong>w</strong>元素，即透明度。我们不希望这个元素受到影响，片元应该保持它的透明程度不变。</p>
+<p>在应用了所有的光效之后，在片元着色器的最后，如果雾特效启用的话，我们将简单地把返回值设置为片元颜色。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ( fog.activeFog == <span class="number">1</span> ) </span><br><span class="line">&#123;</span><br><span class="line">    fragColor = calcFog(mvVertexPos, fragColor, fog);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所有这些代码完成后，我们可以用下面的数据设置一个雾特效：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scene.setFog(<span class="keyword">new</span> Fog(<span class="keyword">true</span>, <span class="keyword">new</span> Vector3f(<span class="number">0.5f</span>, <span class="number">0.5f</span>, <span class="number">0.5f</span>), <span class="number">0.15f</span>));</span><br></pre></td></tr></table></figure>
+<p>然后我们将获得像这样的效果：</p>
+<p><img src="/2019/02/07/Lwjglbook-16-fog/fog_effect.png" alt="雾特效"></p>
+<p>你会看到远处的物体褪色，当你靠近它们时，雾开始消失。但有一个问题，天空盒看起来有点奇怪，地平线不受雾的影响。有几种方法可以解决这个问题：</p>
+<ul>
+<li>使用只能看到天空的另一个不同的天空盒。</li>
+<li>删除天空盒，因为有浓雾，你不应该能够看到一个背景。</li>
+</ul>
+<p>也可能这两个解决方案没有适合你的，你可以试着将雾色与天空盒的背景相匹配，但这样你会做复杂的计算，结果也许不会更好。</p>
+<p>如果你运行这个示例，你会感到平行光变得暗淡，场景变暗，但雾看起来有问题，因为它不受光的影响，会看到如下图所示的结果。</p>
+<p><img src="/2019/02/07/Lwjglbook-16-fog/glowing_fog.png" alt="发光的雾"></p>
+<p>远处的物体变为雾色，这是一个不受光影响的常数。这造成了一个在黑暗中发光的效果（这可能并不好）。我们需要修改计算雾的函数，让其考虑光照。该函数将接收环境光和平行光来调整雾色。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">vec4</span> calcFog(<span class="type">vec3</span> pos, <span class="type">vec4</span> colour, Fog fog, <span class="type">vec3</span> ambientLight, DirectionalLight dirLight)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">vec3</span> fogColor = fog.colour * (ambientLight + dirLight.colour * dirLight.intensity);</span><br><span class="line">    <span class="type">float</span> <span class="built_in">distance</span> = <span class="built_in">length</span>(pos);</span><br><span class="line">    <span class="type">float</span> fogFactor = <span class="number">1.0</span> / <span class="built_in">exp</span>( (<span class="built_in">distance</span> * fog.density)* (<span class="built_in">distance</span> * fog.density));</span><br><span class="line">    fogFactor = <span class="built_in">clamp</span>( fogFactor, <span class="number">0.0</span>, <span class="number">1.0</span> );</span><br><span class="line"></span><br><span class="line">    <span class="type">vec3</span> resultColour = <span class="built_in">mix</span>(fogColor, colour.xyz, fogFactor);</span><br><span class="line">    <span class="keyword">return</span> <span class="type">vec4</span>(resultColour.xyz, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如你所见，平行光我们仅使用了颜色和强度，我们不需要关注它的方向。这样，我们只需要稍微修改函数的调用：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ( fog.active == <span class="number">1</span> ) </span><br><span class="line">&#123;</span><br><span class="line">    fragColor = calcFog(mvVertexPos, fragColor, fog, ambientLight, directionalLight);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在夜晚时，我们会看到这样的效果。</p>
+<p><img src="/2019/02/07/Lwjglbook-16-fog/fog_at_night.png" alt="夜晚的雾"></p>
+<p>一个要强调的重要的事情是，我们必须聪明地选择雾色。这是很重要的，当我们没有天空盒，但有固定的颜色背景，应该把雾色设置为背景色。如果你删除了天空盒的代码并重新运行示例代码，你会得到这样的结果。</p>
+<p><img src="/2019/02/07/Lwjglbook-16-fog/fog_clear_colour_black.png" alt="黑色背景"></p>
+<p>但如果我们把背景色修改为（0.5, 0.5, 0.5），最终结果看起来就是如下所示。</p>
+<p><img src="/2019/02/07/Lwjglbook-16-fog/fog_clear_colour_grey.png" alt="雾灰色背景"></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/LwjglBook/">LwjglBook</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/LWJGL/">LWJGL</a><a href="/tags/OpenGL/">OpenGL</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2019/02/07/Lwjglbook-16-fog/" data-title="使用LWJGL3开发3D游戏 第十六章 雾 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev">
+ <a href="/2019/02/28/Lwjglbook-17-normal-mapping/" title="使用LWJGL3开发3D游戏 第十七章 法线贴图">
+  <strong>上一篇：</strong><br>
+  <span>
+  使用LWJGL3开发3D游戏 第十七章 法线贴图</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/02/07/Lwjglbook-15-terrain-collisions/" title="使用LWJGL3开发3D游戏 第十五章 地形碰撞">
+ <strong>下一篇：</strong><br> 
+ <span>使用LWJGL3开发3D游戏 第十五章 地形碰撞
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '使用LWJGL3开发3D游戏 第十六章 雾',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ 
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.net/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/LwjglBook/" title="LwjglBook">LwjglBook<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>27</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>19</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/LWJGL/" title="LWJGL">LWJGL<sup>18</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Programming/" title="Programming">Programming<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nashorn/" title="Nashorn">Nashorn<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/JNI/" title="JNI">JNI<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer">
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br>
+			喜欢Java，MineCraft和二次元。</p>
+	</section>
+	 
+	<div class="social-font">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons">
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2019 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
