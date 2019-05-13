@@ -37,7 +37,7 @@
 <meta property="og:image" content="https://mouse0w0.github.io/2019/05/10/First-try-JNI/15.png">
 <meta property="og:image" content="https://mouse0w0.github.io/2019/05/10/First-try-JNI/16.png">
 <meta property="og:image" content="https://mouse0w0.github.io/2019/05/10/First-try-JNI/17.png">
-<meta property="og:updated_time" content="2019-05-13T13:53:57.424Z">
+<meta property="og:updated_time" content="2019-05-13T14:15:47.844Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初试JNI">
 <meta name="twitter:description" content="开发环境：Java 11; IntelliJ IDEA 2019.1.1; Visual Studio 2019  第一步：编写Java类 12345678910public class LearnJNI &amp;#123;    public native void helloJNI();    public static void main(String[] args) &amp;#123;">
@@ -125,7 +125,7 @@
 <p><strong>第二步：使用Java类生成C头文件</strong></p>
 <p>在Java的编译输出目录下执行如下指令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javac -h . com.github.mouse0w0.learnjni.LearnJNI</span><br></pre></td></tr></table></figure></p>
 <blockquote>
-<p>在Java 10之前，生成头文件主要通过<code>javah</code>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; javah -classpath . -jni com.github.mouse0w0.learnjni.LearnJNI</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure></p>
+<p>在Java 10之前，生成头文件主要通过<code>javah</code>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javah -classpath . -jni com.github.mouse0w0.learnjni.LearnJNI</span><br></pre></td></tr></table></figure></p>
 </blockquote>
 <p>结果如下图所示：</p>
 <p><img src="/2019/05/10/First-try-JNI/1.png" alt="Javah指令执行结果"></p>
@@ -287,11 +287,11 @@ gitalk.render('gitalk-container')
 			
 		
 			
-				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>6</sup></a></li>
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>6</sup></a></li>
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>6</sup></a></li>
 			
 		
 			
@@ -303,23 +303,11 @@ gitalk.render('gitalk-container')
 			
 		
 			
-				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
-			
-		
-			
 				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Programming/" title="Programming">Programming<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
 			
 		
 			
@@ -327,7 +315,31 @@ gitalk.render('gitalk-container')
 			
 		
 			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/JNI/" title="JNI">JNI<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nashorn/" title="Nashorn">Nashorn<sup>1</sup></a></li>
 			
 		
 			
@@ -335,7 +347,7 @@ gitalk.render('gitalk-container')
 			
 		
 			
-				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+				<li><a href="/tags/Programming/" title="Programming">Programming<sup>1</sup></a></li>
 			
 		
 			
@@ -347,19 +359,7 @@ gitalk.render('gitalk-container')
 			
 		
 			
-				<li><a href="/tags/Nashorn/" title="Nashorn">Nashorn<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/Forge/" title="Forge">Forge<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
 			
 		
 		</ul>
