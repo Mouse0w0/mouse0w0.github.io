@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="baidu-site-verification" content="yEuEEZ7phu">
   
-    <title>游戏引擎多线程架构研究 | 耗子的博客</title>
+    <title>泛谈游戏引擎中的多线程架构 | 耗子的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Mouse0w0">
@@ -15,14 +15,14 @@
     <meta name="description" content="传统游戏开发过程中使用的多是单线程游戏循环，使得游戏在元素较多时面临性能问题。而由于摩尔定律，芯片在单核心频率上的提升愈发困难，转而向多核心发现发展。因此解决游戏性能问题唯有做好多线程设计，提高CPU多核性能运用。最近在开发体素沙盒游戏引擎的过程中，对游戏引擎的多线程架构做了很多思考和设计，最终还是深觉实体组件系统（Entity-Component-System）架构最适合游戏引擎的高性能应用。接">
 <meta name="keywords" content="GameEngine,Architecture">
 <meta property="og:type" content="article">
-<meta property="og:title" content="游戏引擎多线程架构研究">
-<meta property="og:url" content="https://mouse0w0.github.io/2019/11/18/Research-on-Game-Engine-Multi-threading-Architecture/index.html">
+<meta property="og:title" content="泛谈游戏引擎中的多线程架构">
+<meta property="og:url" content="https://mouse0w0.github.io/2019/11/18/Talking-Multi-threading-Architecture-in-Game-Engine/index.html">
 <meta property="og:site_name" content="耗子的博客">
 <meta property="og:description" content="传统游戏开发过程中使用的多是单线程游戏循环，使得游戏在元素较多时面临性能问题。而由于摩尔定律，芯片在单核心频率上的提升愈发困难，转而向多核心发现发展。因此解决游戏性能问题唯有做好多线程设计，提高CPU多核性能运用。最近在开发体素沙盒游戏引擎的过程中，对游戏引擎的多线程架构做了很多思考和设计，最终还是深觉实体组件系统（Entity-Component-System）架构最适合游戏引擎的高性能应用。接">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-11-18T13:35:52.840Z">
+<meta property="og:updated_time" content="2019-11-18T13:41:58.111Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="游戏引擎多线程架构研究">
+<meta name="twitter:title" content="泛谈游戏引擎中的多线程架构">
 <meta name="twitter:description" content="传统游戏开发过程中使用的多是单线程游戏循环，使得游戏在元素较多时面临性能问题。而由于摩尔定律，芯片在单核心频率上的提升愈发困难，转而向多核心发现发展。因此解决游戏性能问题唯有做好多线程设计，提高CPU多核性能运用。最近在开发体素沙盒游戏引擎的过程中，对游戏引擎的多线程架构做了很多思考和设计，最终还是深觉实体组件系统（Entity-Component-System）架构最适合游戏引擎的高性能应用。接">
 
     
@@ -79,7 +79,7 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2019/11/18/Research-on-Game-Engine-Multi-threading-Architecture/" title="游戏引擎多线程架构研究" itemprop="url">游戏引擎多线程架构研究</a>
+      <a href="/2019/11/18/Talking-Multi-threading-Architecture-in-Game-Engine/" title="泛谈游戏引擎中的多线程架构" itemprop="url">泛谈游戏引擎中的多线程架构</a>
   </h1>
   <p class="article-author">By
        
@@ -132,7 +132,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="https://mouse0w0.github.io/2019/11/18/Research-on-Game-Engine-Multi-threading-Architecture/" data-title="游戏引擎多线程架构研究 | 耗子的博客" data-tsina="" class="share clearfix">
+	  <div data-url="https://mouse0w0.github.io/2019/11/18/Talking-Multi-threading-Architecture-in-Game-Engine/" data-title="泛谈游戏引擎中的多线程架构 | 耗子的博客" data-tsina="" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -171,7 +171,7 @@ var gitalk = new Gitalk({
   repo: 'mouse0w0.github.io',
   owner: 'Mouse0w0',
   admin: ['Mouse0w0'],
-  id: '游戏引擎多线程架构研究',      // Ensure uniqueness and length less than 50
+  id: '泛谈游戏引擎中的多线程架构',      // Ensure uniqueness and length less than 50
   distractionFreeMode: false  // Facebook-like distraction free mode
 })
 gitalk.render('gitalk-container')
@@ -255,15 +255,7 @@ gitalk.render('gitalk-container')
 			
 		
 			
-				<li><a href="/tags/Architecture/" title="Architecture">Architecture<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
 			
 		
 			
@@ -271,15 +263,7 @@ gitalk.render('gitalk-container')
 			
 		
 			
-				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/GameEngine/" title="GameEngine">GameEngine<sup>1</sup></a></li>
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
 			
 		
 			
@@ -287,11 +271,27 @@ gitalk.render('gitalk-container')
 			
 		
 			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/Forge/" title="Forge">Forge<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/GameEngine/" title="GameEngine">GameEngine<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Architecture/" title="Architecture">Architecture<sup>1</sup></a></li>
 			
 		
 			
@@ -299,11 +299,11 @@ gitalk.render('gitalk-container')
 			
 		
 			
-				<li><a href="/tags/Nashorn/" title="Nashorn">Nashorn<sup>1</sup></a></li>
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Programming/" title="Programming">Programming<sup>1</sup></a></li>
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
 			
 		
 		</ul>
