@@ -5,25 +5,30 @@
   <meta charset="UTF-8">
   <meta name="baidu-site-verification" content="yEuEEZ7phu">
   
-    <title>如何使用Java本地接口（JNI） | 耗子的博客</title>
+    <title>介绍PlantUML | 耗子的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="Mouse0w0">
     
 
     
-    <meta name="description" content="参考资料： Java Native Interface Specification (Java 11) Java Programming Tutorial Java Native Interface (JNI) JNI 学习笔记">
-<meta name="keywords" content="Java,C&#x2F;C++,Native">
+    <meta name="description" content="为了描述项目的编码需求，常常需要使用一些辅助制图工具，UML图就是一个不错的选择。在经过不断地试用和实践过程中，最终决定使用PlantUML。PlantUML是一个可以使用简单的语法描述UML图的开源工具，也可以简单有效的定制UML图的样式。 PlantUML在VSCode，IntelliJ Idea，Eclipse等多款软件中均有插件支持，下图仅演示如何安装VSCode的PlantUML扩展。">
+<meta name="keywords" content="Tool,Design Pattern">
 <meta property="og:type" content="article">
-<meta property="og:title" content="如何使用Java本地接口（JNI）">
-<meta property="og:url" content="https://mouse0w0.github.io/2019/01/30/How-to-use-JNI/index.html">
+<meta property="og:title" content="介绍PlantUML">
+<meta property="og:url" content="https://mouse0w0.github.io/2020/06/25/Introduction-to-PlantUML/index.html">
 <meta property="og:site_name" content="耗子的博客">
-<meta property="og:description" content="参考资料： Java Native Interface Specification (Java 11) Java Programming Tutorial Java Native Interface (JNI) JNI 学习笔记">
+<meta property="og:description" content="为了描述项目的编码需求，常常需要使用一些辅助制图工具，UML图就是一个不错的选择。在经过不断地试用和实践过程中，最终决定使用PlantUML。PlantUML是一个可以使用简单的语法描述UML图的开源工具，也可以简单有效的定制UML图的样式。 PlantUML在VSCode，IntelliJ Idea，Eclipse等多款软件中均有插件支持，下图仅演示如何安装VSCode的PlantUML扩展。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-06-25T06:45:03.035Z">
+<meta property="og:image" content="https://mouse0w0.github.io/2020/06/25/Introduction-to-PlantUML/vscode_extension.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2020/06/25/Introduction-to-PlantUML/example.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2020/06/25/Introduction-to-PlantUML/monochrome.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2020/06/25/Introduction-to-PlantUML/reverse_monochrome.png">
+<meta property="og:updated_time" content="2020-06-25T13:39:40.935Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="如何使用Java本地接口（JNI）">
-<meta name="twitter:description" content="参考资料： Java Native Interface Specification (Java 11) Java Programming Tutorial Java Native Interface (JNI) JNI 学习笔记">
+<meta name="twitter:title" content="介绍PlantUML">
+<meta name="twitter:description" content="为了描述项目的编码需求，常常需要使用一些辅助制图工具，UML图就是一个不错的选择。在经过不断地试用和实践过程中，最终决定使用PlantUML。PlantUML是一个可以使用简单的语法描述UML图的开源工具，也可以简单有效的定制UML图的样式。 PlantUML在VSCode，IntelliJ Idea，Eclipse等多款软件中均有插件支持，下图仅演示如何安装VSCode的PlantUML扩展。">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2020/06/25/Introduction-to-PlantUML/vscode_extension.png">
 
     
     <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
@@ -79,14 +84,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2019/01/30/How-to-use-JNI/" title="如何使用Java本地接口（JNI）" itemprop="url">如何使用Java本地接口（JNI）</a>
+      <a href="/2020/06/25/Introduction-to-PlantUML/" title="介绍PlantUML" itemprop="url">介绍PlantUML</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
 		
   </p><p class="article-time">
-    <time datetime="2019-01-30T09:04:21.000Z" itemprop="datePublished"> 发表于 2019-01-30</time>
+    <time datetime="2020-06-25T13:30:00.000Z" itemprop="datePublished"> 发表于 2020-06-25</time>
     
   </p>
 </header>
@@ -99,12 +104,25 @@
 		
 		</div>
 		
-		<blockquote>
-<p>参考资料：</p>
-<p><a href="https://docs.oracle.com/en/java/javase/11/docs/specs/jni/index.html" target="_blank" rel="noopener">Java Native Interface Specification (Java 11)</a></p>
-<p><a href="https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaNativeInterface.html" target="_blank" rel="noopener">Java Programming Tutorial Java Native Interface (JNI)</a></p>
-<p><a href="https://www.jianshu.com/p/f6e3dd8edb13" target="_blank" rel="noopener">JNI 学习笔记</a></p>
+		<p>为了描述项目的编码需求，常常需要使用一些辅助制图工具，UML图就是一个不错的选择。在经过不断地试用和实践过程中，最终决定使用PlantUML。PlantUML是一个可以使用简单的语法描述UML图的开源工具，也可以简单有效的定制UML图的样式。</p>
+<p>PlantUML在VSCode，IntelliJ Idea，Eclipse等多款软件中均有插件支持，下图仅演示如何安装VSCode的PlantUML扩展。</p>
+<p><img src="/2020/06/25/Introduction-to-PlantUML/vscode_extension.png" alt="安装 PlantUML 扩展"></p>
+<p>然后，要使用PlantUML的全部功能，还需要安装<strong>Graphviz</strong>。Graphviz是一个开源的图形可视化软件。下载地址：<a href="http://www.graphviz.org/download/" target="_blank" rel="noopener">http://www.graphviz.org/download/</a></p>
+<p>安装完毕后就可以在VSCode中编写你想要的UML类图了。</p>
+<p><code>example.puml</code>：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@startuml</span><br><span class="line">Bob-&gt;Alice : hello</span><br><span class="line">@enduml</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2020/06/25/Introduction-to-PlantUML/example.png" alt="PlantUML 示例"></p>
+<blockquote>
+<p>注：按快捷键<code>Alt+D</code>即可预览PlantUML结果，右键菜单中有更多功能可供选择。</p>
 </blockquote>
+<p>关于PlantUML图的语法，在此不做赘述，请前往官网查看相关教程：<a href="https://plantuml.com/zh/" target="_blank" rel="noopener">PlantUML 中文官网</a></p>
+<p>PlantUML的默认配色不一定很适合所有人使用，有些人更喜欢简洁一些的主题，可以在<code>@startuml</code>后添加<code>skinparam monochrome true</code>参数。</p>
+<p><code>example.puml</code>：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@startuml</span><br><span class="line">skinparam monochrome true</span><br><span class="line">Bob-&gt;Alice : hello</span><br><span class="line">@enduml</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2020/06/25/Introduction-to-PlantUML/monochrome.png" alt="Monochrome 主题"></p>
+<p>有的人更喜欢暗色主题，可以在<code>@startuml</code>后添加<code>skinparam monochrome reverse</code>参数使用暗色主题。</p>
+<p><code>example.puml</code>：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@startuml</span><br><span class="line">skinparam monochrome reverse</span><br><span class="line">Bob-&gt;Alice : hello</span><br><span class="line">@enduml</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2020/06/25/Introduction-to-PlantUML/reverse_monochrome.png" alt="Monochrome 反转主题"></p>
+<p>以上就是PlantUML提供的一些主题，如有需要可以自行阅读PlantUML的<a href="http://plantuml.com/zh/guide" target="_blank" rel="noopener">用户指南</a>，通过<code>skinparam</code>修改样式。</p>
+<p>再推荐一个非官方主题，有需要的可自行取用：<a href="https://github.com/xuanye/plantuml-style-c4" target="_blank" rel="noopener">https://github.com/xuanye/plantuml-style-c4</a>。</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -113,7 +131,7 @@
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/C-C/">C/C++</a><a href="/tags/Native/">Native</a>
+  <span></span> <a href="/tags/Tool/">Tool</a><a href="/tags/Design-Pattern/">Design Pattern</a>
   </div>
 
 </div>
@@ -122,7 +140,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="https://mouse0w0.github.io/2019/01/30/How-to-use-JNI/" data-title="如何使用Java本地接口（JNI） | 耗子的博客" data-tsina="" class="share clearfix">
+	  <div data-url="https://mouse0w0.github.io/2020/06/25/Introduction-to-PlantUML/" data-title="介绍PlantUML | 耗子的博客" data-tsina="" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -135,19 +153,11 @@
 	
 <nav class="article-nav clearfix">
  
- <div class="prev">
- <a href="/2019/01/31/Hello-Gitalk/" title="你好Gitalk">
-  <strong>上一篇：</strong><br>
-  <span>
-  你好Gitalk</span>
-</a>
-</div>
-
 
 <div class="next">
-<a href="/2018/12/05/Advanced-Mixin-Usage-Callback-Injectors/" title="高级Mixin用法——回调注入器">
+<a href="/2020/03/24/Mixin-Reference-Injection-Point-Reference/" title="Mixin参考——注入点参考">
  <strong>下一篇：</strong><br> 
- <span>高级Mixin用法——回调注入器
+ <span>Mixin参考——注入点参考
 </span>
 </a>
 </div>
@@ -169,7 +179,7 @@ var gitalk = new Gitalk({
   repo: 'mouse0w0.github.io',
   owner: 'Mouse0w0',
   admin: ['Mouse0w0'],
-  id: '如何使用Java本地接口（JNI）',      // Ensure uniqueness and length less than 50
+  id: '介绍PlantUML',      // Ensure uniqueness and length less than 50
   distractionFreeMode: false  // Facebook-like distraction free mode
 })
 gitalk.render('gitalk-container')
