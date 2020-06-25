@@ -155,7 +155,7 @@
     <link href="https://mouse0w0.github.io/2019/01/30/How-to-use-JNI/"/>
     <id>https://mouse0w0.github.io/2019/01/30/How-to-use-JNI/</id>
     <published>2019-01-30T09:04:21.000Z</published>
-    <updated>2020-06-25T06:45:03.035Z</updated>
+    <updated>2020-06-25T13:47:15.225Z</updated>
     
     <content type="html"><![CDATA[<blockquote><p>参考资料：</p><p><a href="https://docs.oracle.com/en/java/javase/11/docs/specs/jni/index.html" target="_blank" rel="noopener">Java Native Interface Specification (Java 11)</a></p><p><a href="https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaNativeInterface.html" target="_blank" rel="noopener">Java Programming Tutorial Java Native Interface (JNI)</a></p><p><a href="https://www.jianshu.com/p/f6e3dd8edb13" target="_blank" rel="noopener">JNI 学习笔记</a></p></blockquote>]]></content>
     
@@ -174,8 +174,6 @@
       <category term="Java" scheme="https://mouse0w0.github.io/tags/Java/"/>
     
       <category term="C/C++" scheme="https://mouse0w0.github.io/tags/C-C/"/>
-    
-      <category term="Native" scheme="https://mouse0w0.github.io/tags/Native/"/>
     
   </entry>
   
